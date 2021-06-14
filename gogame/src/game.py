@@ -4,7 +4,7 @@ from src.group import Group, GroupManager
 from src.exceptions import (
     SelfDestructException, KoException, InvalidInputException)
 
-class Game(object):
+class GoGame(object):
     '''
     Manage the high level gameplay of Go
     '''

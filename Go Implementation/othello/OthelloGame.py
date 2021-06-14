@@ -4,7 +4,14 @@ sys.path.append('..')
 from Game import Game
 from .OthelloLogic import Board
 import numpy as np
-
+from othello.goGame import GoGame
+'''
+from othello.board import Board
+from othello.utils import Stone, make_2d_array
+from othello.group import Group, GroupManager
+from othello.exceptions import (
+    SelfDestructException, KoException, InvalidInputException)
+'''
 class OthelloGame(Game):
     square_content = {
         -1: "X",
@@ -21,7 +28,9 @@ class OthelloGame(Game):
 
     def getInitBoard(self):
         # return initial board (numpy board)
-        b = Board(self.n)
+        goGame = GoGame()
+
+        #b = Board(self.n)
         return np.array(b.pieces)
 
     def getBoardSize(self):

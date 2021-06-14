@@ -1,5 +1,5 @@
-from src.utils import Stone, make_2d_array, get_opposite_stone
-from src.exceptions import SelfDestructException, KoException
+from othello.utils import Stone, make_2d_array, get_opposite_stone
+from othello.exceptions import SelfDestructException, KoException
 
 class Group(object):
     '''

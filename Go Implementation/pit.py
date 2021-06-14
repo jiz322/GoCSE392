@@ -23,7 +23,7 @@ else:
 
 # all players
 rp = RandomPlayer(g).play
-gp = GreedyOthelloPlayer(g).play
+#gp = GreedyOthelloPlayer(g).play
 hp = HumanOthelloPlayer(g).play
 
 

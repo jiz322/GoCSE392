@@ -1,24 +1,24 @@
-from src.board import Board
-from src.utils import Stone, make_2d_array
-from src.group import Group, GroupManager
-from src.exceptions import (
+from othello.board import Board
+from othello.utils import Stone, make_2d_array
+from othello.group import Group, GroupManager
+from othello.exceptions import (
     SelfDestructException, KoException, InvalidInputException)
 
-class Game(object):
+class GoGame():
     '''
     Manage the high level gameplay of Go
     '''
-    def __init__(self, config):
+    def __init__(self):
 
         # 2D board
-        self.board = Board(config)
+        self.board = Board()
 
         # dimension of the square board
-        self.board_size = config['board_size']
+        self.board_size = 9
 
         # group manager instance
         self.gm = GroupManager(self.board,
-                               enable_self_destruct=config['enable_self_destruct'])
+                               enable_self_destruct=False)
         
         # count the number of consecutive passes
         self.count_pass = 0

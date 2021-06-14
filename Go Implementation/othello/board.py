@@ -1,26 +1,26 @@
 import numpy as np
-from src.utils import Stone
+from othello.utils import Stone
 
 class Board(np.ndarray):
     '''
     Instance of a 2D grid board extended from np.ndarray
     '''
-    def __new__(cls, config={}):
+    def __new__(cls):
         '''
         Standard procedure for subclassing np.ndarray
         '''
         # dimension of the board
-        board_size = config['board_size']
+        board_size = 9
         shape = (board_size, board_size)
         obj = super(Board, cls).__new__(cls, shape, dtype=np.int)
 
         obj.board_size = board_size
 
         # string to display as a black stone
-        obj.black_stone_render = config['black_stone']
+        obj.black_stone_render = 'b'
 
         # string to display as a white stone
-        obj.white_stone_render = config['white_stone']
+        obj.white_stone_render = 'w'
 
         # fill board with empty slots
         obj.fill(Stone.EMPTY)
