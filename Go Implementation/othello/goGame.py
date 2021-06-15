@@ -60,6 +60,11 @@ class GoGame():
         '''
         if stone == Stone.EMPTY:
             return
+            
+        #check preexist
+        if self.board[y][x] != 0:
+            raise InvalidInputException
+
         self.board.place_stone(stone, y, x)
 
         try:
@@ -148,10 +153,10 @@ class GameUI(object):
     '''
     Main interface between the game and the players
     '''
-    def __init__(self, config):
+    def __init__(self):
 
         # the game object
-        self.game = Game(config)
+        self.game = GoGame()
 
         # store which player's turn it is
         self.turn = Stone.BLACK
@@ -238,7 +243,9 @@ class GameUI(object):
             move = input(f'{player} move: ')
         
         return self._parse_move(move)
-    
+
+    #overide should not be allowed
+    #add check preexist in class GoGame function place stone.
     def _is_valid_input(self, move):
         '''
         Check if the given input would give a valid move, in terms of placing a stone

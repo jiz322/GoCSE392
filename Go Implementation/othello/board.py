@@ -16,6 +16,9 @@ class Board(np.ndarray):
 
         obj.board_size = board_size
 
+        obj.previous_is_pass = False
+        obj.pre_previous_is_pass = False
+
         # string to display as a black stone
         obj.black_stone_render = 'b'
 
