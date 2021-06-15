@@ -73,22 +73,27 @@ class MCTS():
         """
 
         s = self.game.stringRepresentation(canonicalBoard)
-
+        print(canonicalBoard)
         if s not in self.Es:
+            print('if s not in self.Es:')
             self.Es[s] = self.game.getGameEnded(canonicalBoard, 1)
         if self.Es[s] != 0:
+            print('if self.Es[s] != 0:')
             # terminal node
             return -self.Es[s]
 
         if s not in self.Ps:
+            print('if s not in self.Ps:')
             # leaf node
             self.Ps[s], v = self.nnet.predict(canonicalBoard)
             valids = self.game.getValidMoves(canonicalBoard, 1)
             self.Ps[s] = self.Ps[s] * valids  # masking invalid moves
             sum_Ps_s = np.sum(self.Ps[s])
             if sum_Ps_s > 0:
+                print('if sum_Ps_s > 0:')
                 self.Ps[s] /= sum_Ps_s  # renormalize
             else:
+                print('else')
                 # if all valid moves were masked make all valid moves equally probable
 
                 # NB! All valid moves may be masked if either your NNet architecture is insufficient or you've get overfitting or something else.
@@ -105,9 +110,12 @@ class MCTS():
         cur_best = -float('inf')
         best_act = -1
 
+
         # pick the action with the highest upper confidence bound
         for a in range(self.game.getActionSize()):
+            print('for a in range(self.game.getActionSize()):')
             if valids[a]:
+                print((a,valids[a]))
                 if (s, a) in self.Qsa:
                     u = self.Qsa[(s, a)] + self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s]) / (
                             1 + self.Nsa[(s, a)])
@@ -120,8 +128,11 @@ class MCTS():
 
         a = best_act
         next_s, next_player = self.game.getNextState(canonicalBoard, 1, a)
+        #print("next_s")  DEBUG
+        #print(next_s)
         next_s = self.game.getCanonicalForm(next_s, next_player)
-
+        #print("CanonicalForm")
+        #print(next_s)
         v = self.search(next_s)
 
         if (s, a) in self.Qsa:

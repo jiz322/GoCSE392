@@ -34,6 +34,7 @@ class MCTS():
             probs: a policy vector where the probability of the ith action is
                    proportional to Nsa[(s,a)]**(1./temp)
         """
+        
         for i in range(self.args.numMCTSSims):
             self.search(canonicalBoard)
 
@@ -73,22 +74,37 @@ class MCTS():
         """
 
         s = self.game.stringRepresentation(canonicalBoard)
-
+        print(canonicalBoard)
         if s not in self.Es:
+            print('if s not in self.Es:')
+            #print(canonicalBoard)
             self.Es[s] = self.game.getGameEnded(canonicalBoard, 1)
         if self.Es[s] != 0:
+            print('if self.Es[s] != 0:')
+            #print(canonicalBoard)
             # terminal node
             return -self.Es[s]
 
-        if s not in self.Ps:
+        if s not in self.Ps:                        #bug take away: copy using .copy
+            print('if s not in self.Ps:')
+            #print(canonicalBoard)
             # leaf node
             self.Ps[s], v = self.nnet.predict(canonicalBoard)
+            #print('nn')
+            #print(canonicalBoard)
             valids = self.game.getValidMoves(canonicalBoard, 1)
+            #print('valid')
+            #print(canonicalBoard)  
             self.Ps[s] = self.Ps[s] * valids  # masking invalid moves
             sum_Ps_s = np.sum(self.Ps[s])
+            
+            
+            print(v)
             if sum_Ps_s > 0:
+                print('if sum_Ps_s > 0:')
                 self.Ps[s] /= sum_Ps_s  # renormalize
             else:
+                print('else')
                 # if all valid moves were masked make all valid moves equally probable
 
                 # NB! All valid moves may be masked if either your NNet architecture is insufficient or you've get overfitting or something else.
@@ -105,9 +121,12 @@ class MCTS():
         cur_best = -float('inf')
         best_act = -1
 
+
         # pick the action with the highest upper confidence bound
         for a in range(self.game.getActionSize()):
+            print('for a in range(self.game.getActionSize()):')
             if valids[a]:
+                print((a,valids[a]))
                 if (s, a) in self.Qsa:
                     u = self.Qsa[(s, a)] + self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s]) / (
                             1 + self.Nsa[(s, a)])
@@ -120,8 +139,11 @@ class MCTS():
 
         a = best_act
         next_s, next_player = self.game.getNextState(canonicalBoard, 1, a)
+        #print("next_s")  DEBUG
+        #print(next_s)
         next_s = self.game.getCanonicalForm(next_s, next_player)
-
+        #print("CanonicalForm")
+        #print(next_s)
         v = self.search(next_s)
 
         if (s, a) in self.Qsa:

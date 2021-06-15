@@ -42,11 +42,11 @@ class OthelloGame(Game):
         return 82 #9*9+1
 
     def getNextState(self, board, player, action):
-        print('move?')
+        print(action)
         #b = Board(self.n)
         goGame = GameUI() #^
         #b.pieces = np.copy(board)
-        goGame.game.board = board #^initialize
+        goGame.game.board = board.copy() #^initialize
 
         # if player takes action on board, return next (board,player)
         # ###action must be a valid move
@@ -72,7 +72,7 @@ class OthelloGame(Game):
         #b = Board(self.n)
         goGame = GameUI() #^
         #b.pieces = np.copy(board)
-        goGame.game.board = board #^
+        goGame.game.board = board.copy() #^
         #legalMoves =  b.get_legal_moves(player)
 
         x = [0, 1, 2, 3, 4, 5, 6, 7, 8]
@@ -94,24 +94,27 @@ class OthelloGame(Game):
 
     def getGameEnded(self, board, player):
         
-        print('end?')
+        
         # return 0 if not ended, 1 if player 1 won, -1 if player 1 lost
         # player = 1
         #b = Board(self.n)
         #b.pieces = np.copy(board)
         goGame = GameUI() #^
-        goGame.game.board = board #^
+        goGame.game.board = board.copy() #^
+        #print(goGame.game.board)       debug
         #end with 2 consective passes
         # 
         #Black should win when 43:38 (5 points higher) 
         #for simplicity, whoever get 41 will win
         if (goGame.game.board.previous_is_pass and goGame.game.board.pre_previous_is_pass):
+            print('end')
             diff = goGame.game.get_scores().get(player)>goGame.game.get_scores().get(-player)
             if diff > 0:
                 return 1
             else:
                 return -1
         else:
+            print('not end')
             return 0
 
 
@@ -146,7 +149,7 @@ class OthelloGame(Game):
         #b = Board(self.n)
         #b.pieces = np.copy(board)
         goGame = GameUI() #^
-        goGame.game.board = board #^
+        goGame.game.board = board.copy() #^
         #return b.countDiff(player)
         return goGame.game.get_scores().get(player)
 

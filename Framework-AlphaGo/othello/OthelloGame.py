@@ -35,6 +35,7 @@ class OthelloGame(Game):
     def getNextState(self, board, player, action):
         # if player takes action on board, return next (board,player)
         # action must be a valid move
+        print(action)
         if action == self.n*self.n:
             return (board, -player)
         b = Board(self.n)
@@ -59,6 +60,7 @@ class OthelloGame(Game):
     def getGameEnded(self, board, player):
         # return 0 if not ended, 1 if player 1 won, -1 if player 1 lost
         # player = 1
+        print('end?')
         b = Board(self.n)
         b.pieces = np.copy(board)
         if b.has_legal_moves(player):
