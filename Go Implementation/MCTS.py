@@ -74,19 +74,20 @@ class MCTS():
         """
 
         s = self.game.stringRepresentation(canonicalBoard)
+        print('here')
         print(canonicalBoard)
         if s not in self.Es:
-            print('if s not in self.Es:')
+            #print('if s not in self.Es:')
             #print(canonicalBoard)
             self.Es[s] = self.game.getGameEnded(canonicalBoard, 1)
         if self.Es[s] != 0:
-            print('if self.Es[s] != 0:')
+            #print('if self.Es[s] != 0:')
             #print(canonicalBoard)
             # terminal node
             return -self.Es[s]
 
         if s not in self.Ps:                        #bug take away: copy using .copy
-            print('if s not in self.Ps:')
+            #print('if s not in self.Ps:')
             #print(canonicalBoard)
             # leaf node
             self.Ps[s], v = self.nnet.predict(canonicalBoard)
@@ -99,12 +100,12 @@ class MCTS():
             sum_Ps_s = np.sum(self.Ps[s])
             
             
-            print(v)
+            #print(v)
             if sum_Ps_s > 0:
-                print('if sum_Ps_s > 0:')
+                #print('if sum_Ps_s > 0:')
                 self.Ps[s] /= sum_Ps_s  # renormalize
             else:
-                print('else')
+                #print('else')
                 # if all valid moves were masked make all valid moves equally probable
 
                 # NB! All valid moves may be masked if either your NNet architecture is insufficient or you've get overfitting or something else.
@@ -124,9 +125,9 @@ class MCTS():
 
         # pick the action with the highest upper confidence bound
         for a in range(self.game.getActionSize()):
-            print('for a in range(self.game.getActionSize()):')
+            #print('for a in range(self.game.getActionSize()):')
             if valids[a]:
-                print((a,valids[a]))
+                #print((a,valids[a]))
                 if (s, a) in self.Qsa:
                     u = self.Qsa[(s, a)] + self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s]) / (
                             1 + self.Nsa[(s, a)])

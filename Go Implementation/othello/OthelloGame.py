@@ -24,14 +24,15 @@ class OthelloGame(Game):
 
     def __init__(self, n):
         self.n = 9
+        self.goGame = None
 
     def getInitBoard(self):
         # return initial board (numpy board)
-        goGame = GameUI()
+        self.goGame = GameUI()
         #goGame.game.board = np.array(goGame.game.board).append([False, False])
         #b = Board(self.n)
         #return np.array(b.pieces)
-        return goGame.game.board
+        return self.goGame.game.board
 
     def getBoardSize(self):
         # (a,b) tuple
@@ -44,45 +45,43 @@ class OthelloGame(Game):
     def getNextState(self, board, player, action):
         print(action)
         #b = Board(self.n)
-        goGame = GameUI() #^
+        ##goGame = GameUI() #^
         #b.pieces = np.copy(board)
-        goGame.game.board = board.copy() #^initialize
+        self.goGame.game.board = board.copy() #^initialize
 
         # if player takes action on board, return next (board,player)
         # ###action must be a valid move
 
         #if action is pass, record it
         if action == self.n*self.n: #81
-            if goGame.game.board.previous_is_pass == True:
+            if self.goGame.game.board.previous_is_pass == True:
                 pre_previous_is_pass = True
-            goGame.game.board.previous_is_pass = True
-            goGame._switch_turns() #^^
+            self.goGame.game.board.previous_is_pass = True
             return (board, -player)
         move = (int(action/self.n), action%self.n) #remain
         #b.execute_move(move, player)
-        goGame._place_stone(move) #^
-        goGame.game.board.previous_is_pass = False
-        goGame._switch_turns() #^^
+        self.goGame._place_stone(move, player) #^
+        self.goGame.game.board.previous_is_pass = False
         #return (b.pieces, -player)
-        return (goGame.game.board, -player) #^
+        return (self.goGame.game.board, -player) #^
 
     def getValidMoves(self, board, player):
         # return a fixed size binary vector
         valids = [0]*self.getActionSize() #keep
         #b = Board(self.n)
-        goGame = GameUI() #^
+        ##goGame = GameUI() #^
         #b.pieces = np.copy(board)
-        goGame.game.board = board.copy() #^
+        self.goGame.game.board = board.copy() #^
         #legalMoves =  b.get_legal_moves(player)
 
         x = [0, 1, 2, 3, 4, 5, 6, 7, 8]
         y = [0, 1, 2, 3, 4, 5, 6, 7, 8]
         legalMoves = [ (a,b) for a in x for b in y]
         for x, y in legalMoves:
-            if goGame._place_stone((x, y)) == False:
+            if self.goGame._place_stone((x, y), player) == False:
                 legalMoves.remove((x,y))
             else:
-                goGame.game.board.remove_stone(x,y)
+                self.goGame.game.board.remove_stone(x,y)
 
             
         if len(legalMoves)==0:
@@ -99,16 +98,16 @@ class OthelloGame(Game):
         # player = 1
         #b = Board(self.n)
         #b.pieces = np.copy(board)
-        goGame = GameUI() #^
-        goGame.game.board = board.copy() #^
+        ##goGame = GameUI() #^
+        self.goGame.game.board = board.copy() #^
         #print(goGame.game.board)       debug
         #end with 2 consective passes
         # 
         #Black should win when 43:38 (5 points higher) 
         #for simplicity, whoever get 41 will win
-        if (goGame.game.board.previous_is_pass and goGame.game.board.pre_previous_is_pass):
+        if (self.goGame.game.board.previous_is_pass and self.goGame.game.board.pre_previous_is_pass):
             print('end')
-            diff = goGame.game.get_scores().get(player)>goGame.game.get_scores().get(-player)
+            diff = self.goGame.game.get_scores().get(player)>self.goGame.game.get_scores().get(-player)
             if diff > 0:
                 return 1
             else:
@@ -148,10 +147,10 @@ class OthelloGame(Game):
     def getScore(self, board, player):
         #b = Board(self.n)
         #b.pieces = np.copy(board)
-        goGame = GameUI() #^
-        goGame.game.board = board.copy() #^
+        ##goGame = GameUI() #^
+        self.goGame.game.board = board.copy() #^
         #return b.countDiff(player)
-        return goGame.game.get_scores().get(player)
+        return self.goGame.game.get_scores().get(player)
 
     @staticmethod
     def display(board):

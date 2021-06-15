@@ -60,7 +60,7 @@ class GoGame():
         '''
         if stone == Stone.EMPTY:
             return
-            
+
         #check preexist
         if self.board[y][x] != 0:
             raise InvalidInputException
@@ -199,16 +199,16 @@ class GameUI(object):
             winner = Stone.BLACK if black_score > white_score else Stone.WHITE
             winner = self._get_player_name(winner)
             print(f'The winner is {winner}!')        
-
-    def _place_stone(self, move):
+#modified
+    def _place_stone(self, move, player):
         '''
         Place a stone at the specified coordinate. Return True if it is valid
         '''
         y, x = move
         try:
-            if self.turn == Stone.BLACK:
+            if player == 1:
                 self.game.place_black(y, x)
-            elif self.turn == Stone.WHITE:
+            elif player == -1:
                 self.game.place_white(y, x)
             is_turn_over = True
         except Exception as e:
