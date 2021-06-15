@@ -39,6 +39,8 @@ class Board(np.ndarray):
         self.board_size = getattr(obj, 'board_size')
         self.black_stone_render = getattr(obj, 'black_stone_render')
         self.white_stone_render = getattr(obj, 'white_stone_render')
+        self.previous_is_pass = getattr(obj, 'previous_is_pass')
+        self.pre_previous_is_pass = getattr(obj, 'pre_previous_is_pass')
 
     def get_liberty_coords(self, y, x):
         '''
@@ -113,3 +115,4 @@ class Board(np.ndarray):
         if idx < 10:
             return str(idx)
         return chr(idx - 10 + ord('A'))
+

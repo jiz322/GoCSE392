@@ -2,7 +2,6 @@ from __future__ import print_function
 import sys
 sys.path.append('..')
 from Game import Game
-from .OthelloLogic import Board
 import numpy as np
 from othello.goGame import GameUI 
 '''
@@ -43,6 +42,7 @@ class OthelloGame(Game):
         return 82 #9*9+1
 
     def getNextState(self, board, player, action):
+        print('move?')
         #b = Board(self.n)
         goGame = GameUI() #^
         #b.pieces = np.copy(board)
@@ -94,14 +94,13 @@ class OthelloGame(Game):
 
     def getGameEnded(self, board, player):
         
-
+        print('end?')
         # return 0 if not ended, 1 if player 1 won, -1 if player 1 lost
         # player = 1
         #b = Board(self.n)
         #b.pieces = np.copy(board)
         goGame = GameUI() #^
         goGame.game.board = board #^
-
         #end with 2 consective passes
         # 
         #Black should win when 43:38 (5 points higher) 
