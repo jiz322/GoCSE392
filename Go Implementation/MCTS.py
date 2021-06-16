@@ -81,7 +81,6 @@ class MCTS():
         #!! DIFFERENT LOGIC HERE FOR GO TO AVOID STACKOVERFLOW
         #if s not in self.Es:
             #print('if s not in self.Es:')
-            #print(canonicalBoard)
         self.Es[s] = self.game.getGameEnded(canonicalBoard, 1)
 
 

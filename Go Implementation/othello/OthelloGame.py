@@ -57,7 +57,7 @@ class OthelloGame(Game):
         #if action is pass, record it
         if action == self.n*self.n: #81
             print("action is 81")
-            if self.goGame.game.board.previous_is_pass == True: #never reach
+            if self.goGame.game.board.previous_is_pass == True: 
                 self.goGame.game.board.pre_previous_is_pass = True
                 print("prep set to true")
             self.goGame.game.board.previous_is_pass = True
@@ -77,7 +77,7 @@ class OthelloGame(Game):
         ##goGame = GameUI() #^
         #b.pieces = np.copy(board)
         tempGame = copy.deepcopy(self.goGame)
-        tempGame.game.board = board.copy() #^
+        tempGame.game.board = copy.deepcopy(board) #^
         #legalMoves =  b.get_legal_moves(player)
 
         x = [0, 1, 2, 3, 4, 5, 6, 7, 8]
@@ -90,10 +90,11 @@ class OthelloGame(Game):
                 #print((x,y))
                 #print("is false")
                 ilegalMoves.append((x,y))
+                tempGame.game.board = copy.deepcopy(board)
             else:
                 #print((x,y))
                 #print("is true")
-                tempGame.game.board.remove_stone(x,y)
+                tempGame.game.board = copy.deepcopy(board)
         legalMoves = self.Diff(legalMoves, ilegalMoves)
         print (legalMoves)    
         if len(legalMoves)==0:
