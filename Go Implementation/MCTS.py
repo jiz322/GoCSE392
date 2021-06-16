@@ -74,12 +74,21 @@ class MCTS():
         """
 
         s = self.game.stringRepresentation(canonicalBoard)
-        print('here')
-        print(canonicalBoard)
-        if s not in self.Es:
+        #print('mcts')
+        #print(canonicalBoard)
+        #print('l78')
+
+        #!! DIFFERENT LOGIC HERE FOR GO TO AVOID STACKOVERFLOW
+        #if s not in self.Es:
             #print('if s not in self.Es:')
             #print(canonicalBoard)
-            self.Es[s] = self.game.getGameEnded(canonicalBoard, 1)
+        self.Es[s] = self.game.getGameEnded(canonicalBoard, 1)
+
+
+
+        #print("===Es[s]===")  
+        #print(self.Es[s])
+        #print("^^^Es[s]===")  
         if self.Es[s] != 0:
             #print('if self.Es[s] != 0:')
             #print(canonicalBoard)

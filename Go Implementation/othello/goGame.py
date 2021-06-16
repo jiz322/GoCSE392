@@ -63,6 +63,7 @@ class GoGame():
 
         #check preexist
         if self.board[y][x] != 0:
+            print("invalid move")
             raise InvalidInputException
 
         self.board.place_stone(stone, y, x)
@@ -71,9 +72,11 @@ class GoGame():
             self.gm.resolve_board(y, x)
         except SelfDestructException as e:
             self.board.remove_stone(y, x)
+            print('getThis')
             raise e
         except KoException as e:
             self.board.remove_stone(y, x)
+            print('getKo')
             raise e
             
         self.count_pass = 0
@@ -205,15 +208,26 @@ class GameUI(object):
         Place a stone at the specified coordinate. Return True if it is valid
         '''
         y, x = move
+        is_turn_over = True
         try:
             if player == 1:
                 self.game.place_black(y, x)
             elif player == -1:
                 self.game.place_white(y, x)
-            is_turn_over = True
         except Exception as e:
-            print(e)
-            is_turn_over = False
+            #print(str(e))
+            e1 = InvalidInputException()
+            e2 = KoException()
+            e3 = SelfDestructException()
+            if type(e) is type(e1) and e.args == e1.args:
+                print("Invalid catched")
+                is_turn_over = False
+            if type(e) is type(e2) and e.args == e2.args:
+                print("ko catched")
+                is_turn_over = False
+            if type(e) is type(e3) and e.args == e3.args:
+                print("SelfDestruct catched")
+                is_turn_over = False
         return is_turn_over
 
     def _get_player_name(self, stone):

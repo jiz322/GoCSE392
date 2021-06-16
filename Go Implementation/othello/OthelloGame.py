@@ -1,5 +1,6 @@
 from __future__ import print_function
 import sys
+import copy
 sys.path.append('..')
 from Game import Game
 import numpy as np
@@ -48,16 +49,20 @@ class OthelloGame(Game):
         ##goGame = GameUI() #^
         #b.pieces = np.copy(board)
         self.goGame.game.board = board.copy() #^initialize
+        self.goGame.game.gm.board = board.copy()
 
         # if player takes action on board, return next (board,player)
         # ###action must be a valid move
 
         #if action is pass, record it
         if action == self.n*self.n: #81
-            if self.goGame.game.board.previous_is_pass == True:
-                pre_previous_is_pass = True
+            print("action is 81")
+            if self.goGame.game.board.previous_is_pass == True: #never reach
+                self.goGame.game.board.pre_previous_is_pass = True
+                print("prep set to true")
             self.goGame.game.board.previous_is_pass = True
-            return (board, -player)
+            print("p set to true")
+            return (self.goGame.game.board, -player)
         move = (int(action/self.n), action%self.n) #remain
         #b.execute_move(move, player)
         self.goGame._place_stone(move, player) #^
@@ -71,24 +76,32 @@ class OthelloGame(Game):
         #b = Board(self.n)
         ##goGame = GameUI() #^
         #b.pieces = np.copy(board)
-        self.goGame.game.board = board.copy() #^
+        tempGame = copy.deepcopy(self.goGame)
+        tempGame.game.board = board.copy() #^
         #legalMoves =  b.get_legal_moves(player)
 
         x = [0, 1, 2, 3, 4, 5, 6, 7, 8]
         y = [0, 1, 2, 3, 4, 5, 6, 7, 8]
         legalMoves = [ (a,b) for a in x for b in y]
+        ilegalMoves = [] 
         for x, y in legalMoves:
-            if self.goGame._place_stone((x, y), player) == False:
-                legalMoves.remove((x,y))
+            legal = tempGame._place_stone((x, y), player)
+            if legal == False:
+                #print((x,y))
+                #print("is false")
+                ilegalMoves.append((x,y))
             else:
-                self.goGame.game.board.remove_stone(x,y)
-
-            
+                #print((x,y))
+                #print("is true")
+                tempGame.game.board.remove_stone(x,y)
+        legalMoves = self.Diff(legalMoves, ilegalMoves)
+        print (legalMoves)    
         if len(legalMoves)==0:
             valids[-1]=1
             return np.array(valids)
         for x, y in legalMoves:
             valids[self.n*x+y]=1
+        
         return np.array(valids)
 
     def getGameEnded(self, board, player):
@@ -105,12 +118,19 @@ class OthelloGame(Game):
         # 
         #Black should win when 43:38 (5 points higher) 
         #for simplicity, whoever get 41 will win
+        print('self.goGame.game.board.previous_is_pass')
+        print(self.goGame.game.board.previous_is_pass)
+        print(self.goGame.game.board.pre_previous_is_pass)
+        print('self.goGame.game.board.pre_previous_is_pass')
         if (self.goGame.game.board.previous_is_pass and self.goGame.game.board.pre_previous_is_pass):
-            print('end')
+            print('enddd')
             diff = self.goGame.game.get_scores().get(player)>self.goGame.game.get_scores().get(-player)
+            print(self.goGame.game.board)
             if diff > 0:
+                print("current player win")
                 return 1
             else:
+                print("oppo player win")
                 return -1
         else:
             print('not end')
@@ -168,3 +188,6 @@ class OthelloGame(Game):
             print("|")
 
         print("-----------------------")
+    
+    def Diff(self, li1, li2):
+        return list(set(li1) - set(li2)) + list(set(li2) - set(li1))

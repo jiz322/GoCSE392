@@ -4,7 +4,7 @@ class Stone:
     WHITE = -1
 
 def get_opposite_stone(stone):
-    assert(stone != Stone.EMPTY)
+    #assert(stone != Stone.EMPTY)
     if stone == Stone.BLACK:
         return Stone.WHITE
     return Stone.BLACK

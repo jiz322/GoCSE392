@@ -269,6 +269,7 @@ class GroupManager(object):
         At this point, the move prior is considered valid, and 
         all post-processing of captures occurs here
         '''
+        print("updated")
         for g in self._captured_groups:
 
             # nullify group
@@ -293,3 +294,4 @@ class GroupManager(object):
             self._num_captured_stones[g.stone] += g.num_coords
 
         self._captured_groups.clear()
+        print(self.board)
