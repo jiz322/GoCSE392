@@ -48,8 +48,8 @@ class OthelloGame(Game):
         #b = Board(self.n)
         ##goGame = GameUI() #^
         #b.pieces = np.copy(board)
-        self.goGame.game.board = board.copy() #^initialize
-        self.goGame.game.gm.board = board.copy()
+        self.goGame.game.board = board  #^initialize
+        #self.goGame.game.gm.board = copy.deepcopy(board) 
 
         # if player takes action on board, return next (board,player)
         # ###action must be a valid move
@@ -67,6 +67,9 @@ class OthelloGame(Game):
         #b.execute_move(move, player)
         self.goGame._place_stone(move, player) #^
         self.goGame.game.board.previous_is_pass = False
+        #self.goGame.game.gm.board = copy.deepcopy(self.goGame.game.board)
+        #self.goGame.game.gm.update_state()
+        #self.goGame.game.board = copy.deepcopy(self.goGame.game.gm.board)
         #return (b.pieces, -player)
         return (self.goGame.game.board, -player) #^
 
@@ -113,16 +116,16 @@ class OthelloGame(Game):
         #b = Board(self.n)
         #b.pieces = np.copy(board)
         ##goGame = GameUI() #^
-        self.goGame.game.board = board.copy() #^
+        self.goGame.game.board = board#^
         #print(goGame.game.board)       debug
         #end with 2 consective passes
         # 
         #Black should win when 43:38 (5 points higher) 
         #for simplicity, whoever get 41 will win
-        print('self.goGame.game.board.previous_is_pass')
-        print(self.goGame.game.board.previous_is_pass)
-        print(self.goGame.game.board.pre_previous_is_pass)
-        print('self.goGame.game.board.pre_previous_is_pass')
+        #print('self.goGame.game.board.previous_is_pass')
+        #print(self.goGame.game.board.previous_is_pass)
+        #print(self.goGame.game.board.pre_previous_is_pass)
+        #print('self.goGame.game.board.pre_previous_is_pass')
         if (self.goGame.game.board.previous_is_pass and self.goGame.game.board.pre_previous_is_pass):
             print('enddd')
             diff = self.goGame.game.get_scores().get(player)>self.goGame.game.get_scores().get(-player)
