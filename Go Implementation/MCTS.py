@@ -47,10 +47,14 @@ class MCTS():
             probs = [0] * len(counts)
             probs[bestA] = 1
             return probs
-
+        #print(counts)
         counts = [x ** (1. / temp) for x in counts]
+        #print(counts)
         counts_sum = float(sum(counts))
-        probs = [x / counts_sum for x in counts]
+        if counts_sum != 0:
+            probs = [x / counts_sum for x in counts]
+        else:
+            probs = [1 / len(counts) for x in counts]
         return probs
 
     def search(self, canonicalBoard):

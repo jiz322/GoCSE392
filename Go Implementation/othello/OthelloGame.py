@@ -44,7 +44,7 @@ class OthelloGame(Game):
         return 82 #9*9+1
 
     def getNextState(self, board, player, action):
-        print(action)
+       # print(action)
         #b = Board(self.n)
         ##goGame = GameUI() #^
         #b.pieces = np.copy(board)
@@ -56,12 +56,12 @@ class OthelloGame(Game):
 
         #if action is pass, record it
         if action == self.n*self.n: #81
-            print("action is 81")
+          #  print("action is 81")
             if self.goGame.game.board.previous_is_pass == True: 
                 self.goGame.game.board.pre_previous_is_pass = True
-                print("prep set to true")
+            #    print("prep set to true")
             self.goGame.game.board.previous_is_pass = True
-            print("p set to true")
+         #   print("p set to true")
             return (self.goGame.game.board, -player)
         move = (int(action/self.n), action%self.n) #remain
         #b.execute_move(move, player)
@@ -99,7 +99,7 @@ class OthelloGame(Game):
                 #print("is true")
                 tempGame.game.board = copy.deepcopy(board)
         legalMoves = self.Diff(legalMoves, ilegalMoves)
-        print (legalMoves)    
+       # print (legalMoves)    
         if len(legalMoves)==0:
             valids[-1]=1
             return np.array(valids)
@@ -127,17 +127,17 @@ class OthelloGame(Game):
         #print(self.goGame.game.board.pre_previous_is_pass)
         #print('self.goGame.game.board.pre_previous_is_pass')
         if (self.goGame.game.board.previous_is_pass and self.goGame.game.board.pre_previous_is_pass):
-            print('enddd')
+            #print('enddd')
             diff = self.goGame.game.get_scores().get(player)>self.goGame.game.get_scores().get(-player)
-            print(self.goGame.game.board)
+            #print(self.goGame.game.board)
             if diff > 0:
-                print("current player win")
+                #print("current player win")
                 return 1
             else:
-                print("oppo player win")
+                #print("oppo player win")
                 return -1
         else:
-            print('not end')
+          #  print('not end')
             return 0
 
 

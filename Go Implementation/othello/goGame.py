@@ -63,7 +63,7 @@ class GoGame():
 
         #check preexist
         if self.board[y][x] != 0:
-            print("invalid move")
+        #    print("invalid move")
             raise InvalidInputException
 
         self.board.place_stone(stone, y, x)
@@ -220,13 +220,13 @@ class GameUI(object):
             e2 = KoException()
             e3 = SelfDestructException()
             if type(e) is type(e1) and e.args == e1.args:
-                print("Invalid catched")
+        #        print("Invalid catched")
                 is_turn_over = False
             if type(e) is type(e2) and e.args == e2.args:
                 print("ko catched")
                 is_turn_over = False
             if type(e) is type(e3) and e.args == e3.args:
-                print("SelfDestruct catched")
+         #       print("SelfDestruct catched")
                 is_turn_over = False
         return is_turn_over
 
