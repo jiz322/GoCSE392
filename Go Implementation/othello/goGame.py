@@ -72,7 +72,7 @@ class GoGame():
             self.gm.resolve_board(y, x)
         except SelfDestructException as e:
             self.board.remove_stone(y, x)
-            print('getThis')
+        #    print('getThis')
             raise e
         except KoException as e:
             self.board.remove_stone(y, x)
