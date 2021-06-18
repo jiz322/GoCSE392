@@ -221,13 +221,13 @@ class GameUI(object):
             e2 = KoException()
             e3 = SelfDestructException()
             if type(e) is type(e1):
-        #        print("Invalid catched")
+                print("Invalid catched")
                 is_turn_over = False
             elif type(e) is type(e2):
                 print("ko catched")
                 is_turn_over = False
             elif type(e) is type(e3):
-         #       print("SelfDestruct catched")
+                print("SelfDestruct catched")
                 is_turn_over = False
             else:               
                 print >> sys.stderr, "other error exist"
