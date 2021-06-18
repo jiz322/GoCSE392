@@ -1,5 +1,5 @@
 import numpy as np
-from othello.utils import Stone
+from othello.utils import Stone, make_2d_array, get_opposite_stone
 
 class Board(np.ndarray):
     '''
@@ -18,6 +18,7 @@ class Board(np.ndarray):
 
         obj.previous_is_pass = False
         obj.pre_previous_is_pass = False
+        obj._group_map = make_2d_array(board_size, board_size)
 
         # string to display as a black stone
         obj.black_stone_render = 'b'
@@ -41,6 +42,7 @@ class Board(np.ndarray):
         self.white_stone_render = getattr(obj, 'white_stone_render')
         self.previous_is_pass = getattr(obj, 'previous_is_pass')
         self.pre_previous_is_pass = getattr(obj, 'pre_previous_is_pass')
+        self._group_map = getattr(obj, '_group_map')
 
     def get_liberty_coords(self, y, x):
         '''

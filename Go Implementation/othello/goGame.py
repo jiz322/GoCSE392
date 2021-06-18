@@ -1,3 +1,4 @@
+import sys
 from othello.board import Board
 from othello.utils import Stone, make_2d_array
 from othello.group import Group, GroupManager
@@ -219,15 +220,19 @@ class GameUI(object):
             e1 = InvalidInputException()
             e2 = KoException()
             e3 = SelfDestructException()
-            if type(e) is type(e1) and e.args == e1.args:
+            if type(e) is type(e1):
         #        print("Invalid catched")
                 is_turn_over = False
-            if type(e) is type(e2) and e.args == e2.args:
+            elif type(e) is type(e2):
                 print("ko catched")
                 is_turn_over = False
-            if type(e) is type(e3) and e.args == e3.args:
+            elif type(e) is type(e3):
          #       print("SelfDestruct catched")
                 is_turn_over = False
+            else:               
+                print >> sys.stderr, "other error exist"
+                print >> sys.stderr, "Exception: %s" % str(e)
+                sys.exit(1)
         return is_turn_over
 
     def _get_player_name(self, stone):

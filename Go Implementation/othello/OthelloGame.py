@@ -5,6 +5,7 @@ sys.path.append('..')
 from Game import Game
 import numpy as np
 from othello.goGame import GameUI 
+from othello.group import Group, GroupManager
 '''
 from othello.board import Board
 from othello.utils import Stone, make_2d_array
@@ -44,11 +45,6 @@ class OthelloGame(Game):
         return 82 #9*9+1
 
     def getNextState(self, board, player, action):
-       # print(action)
-        #b = Board(self.n)
-        ##goGame = GameUI() #^
-        #b.pieces = np.copy(board)
-        #self.goGame.game.gm.board = copy.deepcopy(board) 
 
         # if player takes action on board, return next (board,player)
         # ###action must be a valid move
@@ -63,19 +59,15 @@ class OthelloGame(Game):
          #   print("p set to true")
             return (board, -player)
         move = (int(action/self.n), action%self.n) #remain
-        #b.execute_move(move, player)
         self.goGame.game.board = copy.deepcopy(board)
-        self.goGame.game.gm.board = copy.deepcopy(board) 
+        self.goGame.game.gm = GroupManager(self.goGame.game.board, enable_self_destruct=False)
+        self.goGame.game.gm._group_map = board._group_map
         self.goGame._place_stone(move, player) #^
-        board = copy.deepcopy(self.goGame.game.board)
+        board._group_map = self.goGame.game.gm._group_map
         board.previous_is_pass = False
-        #self.goGame.game.gm.board = copy.deepcopy(self.goGame.game.board)
-        #self.goGame.game.gm.update_state()
-        #self.goGame.game.board = copy.deepcopy(self.goGame.game.gm.board)
-        #return (b.pieces, -player)
         print(action)
         print(self.goGame.game.board)
-        return (board, -player) #^
+        return (self.goGame.game.board, -player) #^
 
     def getValidMoves(self, board, player):
         # return a fixed size binary vector
