@@ -19,6 +19,11 @@ class Board(np.ndarray):
         obj.previous_is_pass = False
         obj.pre_previous_is_pass = False
         obj._group_map = make_2d_array(board_size, board_size)
+        obj._captured_groups = set()
+        obj._num_captured_stones = {
+            Stone.WHITE: 0,
+            Stone.BLACK: 0
+        }
 
         # string to display as a black stone
         obj.black_stone_render = 'b'
@@ -43,6 +48,8 @@ class Board(np.ndarray):
         self.previous_is_pass = getattr(obj, 'previous_is_pass')
         self.pre_previous_is_pass = getattr(obj, 'pre_previous_is_pass')
         self._group_map = getattr(obj, '_group_map')
+        self._captured_groups = getattr(obj, '_captured_groups')
+        self._num_captured_stones = getattr(obj, '_num_captured_stones')
 
     def get_liberty_coords(self, y, x):
         '''

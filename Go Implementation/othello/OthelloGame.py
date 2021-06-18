@@ -51,34 +51,51 @@ class OthelloGame(Game):
 
         #if action is pass, record it
         if action == self.n*self.n: #81
-          #  print("action is 81")
             if board.previous_is_pass == True: 
                 board.pre_previous_is_pass = True
-            #    print("prep set to true")
             board.previous_is_pass = True
-         #   print("p set to true")
             return (board, -player)
-        move = (int(action/self.n), action%self.n) #remain
+
+        move = (int(action/self.n), action%self.n) #Interpret the Action
+
+        # initialize the board and group manager for simulating
         self.goGame.game.board = copy.deepcopy(board)
         self.goGame.game.gm = GroupManager(self.goGame.game.board, enable_self_destruct=False)
-        self.goGame.game.gm._group_map = board._group_map
+        self.goGame.game.gm._group_map = copy.deepcopy(board._group_map)
+        self.goGame.game.gm._captured_groups = copy.deepcopy(board._captured_groups)
+        self.goGame.game.gm._num_captured_stones = copy.deepcopy(board._num_captured_stones)
+
+        #make the move
         self.goGame._place_stone(move, player) #^
-        board._group_map = self.goGame.game.gm._group_map
+
+        #load necessary fields back to the board
+        board = copy.deepcopy(self.goGame.game.board)
         board.previous_is_pass = False
+        board._group_map = copy.deepcopy(self.goGame.game.gm._group_map)
+        board._captured_groups = copy.deepcopy(self.goGame.game.gm._captured_groups)
+        board._num_captured_stones = copy.deepcopy(self.goGame.game.gm._num_captured_stones)
+
+        #bug log
         print(action)
         print(self.goGame.game.board)
-        return (self.goGame.game.board, -player) #^
+        print(board._group_map)
+        return (copy.deepcopy(board), -player) #^
 
     def getValidMoves(self, board, player):
-        # return a fixed size binary vector
+
+        #initialize a valids list contains all actions
         valids = [0]*self.getActionSize() #keep
-        #b = Board(self.n)
-        ##goGame = GameUI() #^
-        #b.pieces = np.copy(board)
+
+        #load board properities into tempGame
         tempGame = copy.deepcopy(self.goGame)
         tempGame.game.board = copy.deepcopy(board) #^
-        #legalMoves =  b.get_legal_moves(player)
+        tempGame.game.gm = GroupManager(self.goGame.game.board, enable_self_destruct=False)
+        tempGame.game.gm._group_map = copy.deepcopy(board._group_map)
+        tempGame.game.gm._captured_groups = copy.deepcopy(board._captured_groups)
+        tempGame.game.gm._num_captured_stones = copy.deepcopy(board._num_captured_stones)
+ 
 
+        # Construct all possible tuples, then filter away ilegals
         x = [0, 1, 2, 3, 4, 5, 6, 7, 8]
         y = [0, 1, 2, 3, 4, 5, 6, 7, 8]
         legalMoves = [ (a,b) for a in x for b in y]
@@ -86,22 +103,17 @@ class OthelloGame(Game):
         for x, y in legalMoves:
             legal = tempGame._place_stone((x, y), player)
             if legal == False:
-                #print((x,y))
-                #print("is false")
                 ilegalMoves.append((x,y))
                 tempGame.game.board = copy.deepcopy(board)
             else:
-                #print((x,y))
-                #print("is true")
                 tempGame.game.board = copy.deepcopy(board)
-        legalMoves = self.Diff(legalMoves, ilegalMoves)
-       # print (legalMoves)    
+        legalMoves = self.Diff(legalMoves, ilegalMoves)  
         if len(legalMoves)==0:
             valids[-1]=1
             return np.array(valids)
         for x, y in legalMoves:
             valids[self.n*x+y]=1
-        
+      
         return np.array(valids)
 
     def getGameEnded(self, board, player):
