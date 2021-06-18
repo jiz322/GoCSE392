@@ -51,6 +51,13 @@ class MCTS():
         counts = [x ** (1. / temp) for x in counts]
         #print(counts)
         counts_sum = float(sum(counts))
+
+
+        ##############
+        #To AVOID DIVIDBYZERO, ADD THE FOLLOWING LOGIC
+        ##########
+
+
         if counts_sum != 0:
             probs = [x / counts_sum for x in counts]
         else:
