@@ -45,7 +45,7 @@ class OthelloGame(Game):
         return self.n*self.n+1 #9*9+1
 
     def getNextState(self, board, player, action):
-        #print(action)
+        print(action)
         # if player takes action on board, return next (board,player)
         # ###action must be a valid move
 
@@ -80,7 +80,7 @@ class OthelloGame(Game):
 
         #bug log
         #print("turns", board.turns)
-        #print(self.goGame.game.board)
+        print(self.goGame.game.board)
         #print(board._group_map)
         return (copy.deepcopy(board), -player) #^
 
@@ -126,7 +126,8 @@ class OthelloGame(Game):
                 self.goGame.game.gm._num_captured_stones = copy.deepcopy(board._num_captured_stones)
                 self.goGame.game.gm._ko = copy.deepcopy(board._ko)
         legalMoves = self.Diff(legalMoves, ilegalMoves) 
-        valids[-1]=1 #fixed ending logic: can pass at any time 
+        if board.turns > self.n*self.n/2: #only alow pass when reach certain turns
+            valids[-1]=1 
         if len(legalMoves)==0:
             return np.array(valids)
         for x, y in legalMoves:
@@ -155,13 +156,14 @@ class OthelloGame(Game):
         #print('self.goGame.game.board.pre_previous_is_pass')
         if ((self.goGame.game.board.previous_is_pass and self.goGame.game.board.pre_previous_is_pass) or board.turns > self.n*self.n*3/2):
             #print('enddd')
+            print(board)
             diff = self.goGame.game.get_scores().get(player)>self.goGame.game.get_scores().get(-player)
             #print(self.goGame.game.board)
             if diff > 0:
-                #print("current player win")
+                print("current player win")
                 return 1
             else:
-                #print("oppo player win")
+                print("oppo player win")
                 return -1
         else:
           #  print('not end')
