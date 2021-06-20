@@ -25,12 +25,12 @@ class OthelloGame(Game):
         return OthelloGame.square_content[piece]
 
     def __init__(self, n):
-        self.n = 9
+        self.n = n
         self.goGame = None
 
     def getInitBoard(self):
         # return initial board (numpy board)
-        self.goGame = GameUI()
+        self.goGame = GameUI(self.n)
         #goGame.game.board = np.array(goGame.game.board).append([False, False])
         #b = Board(self.n)
         #return np.array(b.pieces)
@@ -38,11 +38,11 @@ class OthelloGame(Game):
 
     def getBoardSize(self):
         # (a,b) tuple
-        return (9, 9)
+        return (self.n, self.n)
 
     def getActionSize(self):
         # return number of actions
-        return 82 #9*9+1
+        return self.n*self.n+1 #9*9+1
 
     def getNextState(self, board, player, action):
         #print(action)
@@ -99,8 +99,8 @@ class OthelloGame(Game):
         self.goGame.game.gm._ko = copy.deepcopy(board._ko)
 
         # Construct all possible tuples, then filter away ilegals
-        x = [0, 1, 2, 3, 4, 5, 6, 7, 8]
-        y = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+        x = list(range(0,self.n))
+        y = list(range(0,self.n))
         legalMoves = [ (a,b) for a in x for b in y]
         ilegalMoves = [] 
         #print(board)
@@ -153,7 +153,7 @@ class OthelloGame(Game):
         #print(self.goGame.game.board.previous_is_pass)
         #print(self.goGame.game.board.pre_previous_is_pass)
         #print('self.goGame.game.board.pre_previous_is_pass')
-        if ((self.goGame.game.board.previous_is_pass and self.goGame.game.board.pre_previous_is_pass) or board.turns > 100):
+        if ((self.goGame.game.board.previous_is_pass and self.goGame.game.board.pre_previous_is_pass) or board.turns > self.n*self.n*2):
             #print('enddd')
             diff = self.goGame.game.get_scores().get(player)>self.goGame.game.get_scores().get(-player)
             #print(self.goGame.game.board)
@@ -173,8 +173,8 @@ class OthelloGame(Game):
         #change of board
         board = player*board
         #change of _group_map:  reverse  _group_map[0][1].stone
-        row = 9
-        col = 9
+        row = self.n
+        col = self.n
         for j in range(col):
             for i in range(row):
                 if board._group_map[i][j] is not None:

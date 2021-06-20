@@ -5,12 +5,12 @@ class Board(np.ndarray):
     '''
     Instance of a 2D grid board extended from np.ndarray
     '''
-    def __new__(cls):
+    def __new__(cls, n):
         '''
         Standard procedure for subclassing np.ndarray
         '''
         # dimension of the board
-        board_size = 9
+        board_size = n
         shape = (board_size, board_size)
         obj = super(Board, cls).__new__(cls, shape, dtype=np.int)
 

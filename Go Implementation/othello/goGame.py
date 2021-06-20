@@ -9,13 +9,13 @@ class GoGame():
     '''
     Manage the high level gameplay of Go
     '''
-    def __init__(self):
+    def __init__(self, n):
 
         # 2D board
-        self.board = Board()
+        self.board = Board(n)
 
         # dimension of the square board
-        self.board_size = 9
+        self.board_size = n
 
         # group manager instance
         self.gm = GroupManager(self.board,
@@ -157,10 +157,10 @@ class GameUI(object):
     '''
     Main interface between the game and the players
     '''
-    def __init__(self):
+    def __init__(self, n):
 
         # the game object
-        self.game = GoGame()
+        self.game = GoGame(n)
 
         # store which player's turn it is
         self.turn = Stone.BLACK
@@ -230,7 +230,7 @@ class GameUI(object):
                 #print("SelfDestruct catched")
                 return False
             else:               
-                #print >> sys.stderr, "other error exist"
+                print >> sys.stderr, "other error exist"
                 #print >> sys.stderr, "Exception: %s" % str(e)
                 sys.exit(1)
         return is_turn_over
