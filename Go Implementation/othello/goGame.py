@@ -77,7 +77,7 @@ class GoGame():
             raise e
         except KoException as e:
             self.board.remove_stone(y, x)
-            print('getKo')
+        #    print('getKo')
             raise e
             
         self.count_pass = 0
