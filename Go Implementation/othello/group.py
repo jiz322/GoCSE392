@@ -176,7 +176,7 @@ class GroupManager(object):
             cy, cx = captured[0]
             captured_group = self._get_group(cy, cx)
             if (cy, cx) == self._ko:
-                self.undo_stone(y, x)
+                self.undo_stone(y, x)  #use it to optimise
                 raise KoException('You may not repeat the last board state. Please choose a different move')
             if captured_group.num_coords == 1:
                 self._ko = (y, x)

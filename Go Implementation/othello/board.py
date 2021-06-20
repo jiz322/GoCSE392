@@ -25,6 +25,9 @@ class Board(np.ndarray):
             Stone.BLACK: 0
         }
         obj.turns = 0
+        obj._ko = None
+
+
         # string to display as a black stone
         obj.black_stone_render = 'b'
 
@@ -51,6 +54,7 @@ class Board(np.ndarray):
         self._captured_groups = getattr(obj, '_captured_groups')
         self._num_captured_stones = getattr(obj, '_num_captured_stones')
         self.turns = getattr(obj, 'turns')
+        self._ko = getattr(obj, '_ko')
     def get_liberty_coords(self, y, x):
         '''
         Return the liberty coordinates for (y, x). This constitutes

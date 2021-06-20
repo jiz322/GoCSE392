@@ -64,6 +64,7 @@ class OthelloGame(Game):
         self.goGame.game.gm._group_map = copy.deepcopy(board._group_map)
         self.goGame.game.gm._captured_groups = copy.deepcopy(board._captured_groups)
         self.goGame.game.gm._num_captured_stones = copy.deepcopy(board._num_captured_stones)
+        self.goGame.game.gm._ko = copy.deepcopy(board._ko)
 
         #make the move
         self.goGame._place_stone(move, player) #^
@@ -75,6 +76,7 @@ class OthelloGame(Game):
         board._group_map = copy.deepcopy(self.goGame.game.gm._group_map)
         board._captured_groups = copy.deepcopy(self.goGame.game.gm._captured_groups)
         board._num_captured_stones = copy.deepcopy(self.goGame.game.gm._num_captured_stones)
+        board._ko = copy.deepcopy(self.goGame.game.gm._ko)
 
         #bug log
         #print("turns", board.turns)
@@ -94,7 +96,7 @@ class OthelloGame(Game):
         self.goGame.game.gm._group_map = copy.deepcopy(board._group_map)
         self.goGame.game.gm._captured_groups = copy.deepcopy(board._captured_groups)
         self.goGame.game.gm._num_captured_stones = copy.deepcopy(board._num_captured_stones)
- 
+        self.goGame.game.gm._ko = copy.deepcopy(board._ko)
 
         # Construct all possible tuples, then filter away ilegals
         x = [0, 1, 2, 3, 4, 5, 6, 7, 8]
@@ -114,6 +116,7 @@ class OthelloGame(Game):
                 self.goGame.game.gm._group_map = copy.deepcopy(board._group_map)
                 self.goGame.game.gm._captured_groups = copy.deepcopy(board._captured_groups)
                 self.goGame.game.gm._num_captured_stones = copy.deepcopy(board._num_captured_stones)
+                self.goGame.game.gm._ko = copy.deepcopy(board._ko)
             else:
                 #print('legal')
                 self.goGame.game.board = copy.deepcopy(board)
@@ -121,6 +124,7 @@ class OthelloGame(Game):
                 self.goGame.game.gm._group_map = copy.deepcopy(board._group_map)
                 self.goGame.game.gm._captured_groups = copy.deepcopy(board._captured_groups)
                 self.goGame.game.gm._num_captured_stones = copy.deepcopy(board._num_captured_stones)
+                self.goGame.game.gm._ko = copy.deepcopy(board._ko)
         legalMoves = self.Diff(legalMoves, ilegalMoves)  
         if len(legalMoves)==0:
             valids[-1]=1
@@ -149,7 +153,7 @@ class OthelloGame(Game):
         #print(self.goGame.game.board.previous_is_pass)
         #print(self.goGame.game.board.pre_previous_is_pass)
         #print('self.goGame.game.board.pre_previous_is_pass')
-        if (self.goGame.game.board.previous_is_pass and self.goGame.game.board.pre_previous_is_pass):
+        if ((self.goGame.game.board.previous_is_pass and self.goGame.game.board.pre_previous_is_pass) or board.turns > 100):
             #print('enddd')
             diff = self.goGame.game.get_scores().get(player)>self.goGame.game.get_scores().get(-player)
             #print(self.goGame.game.board)
