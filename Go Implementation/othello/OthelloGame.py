@@ -125,9 +125,9 @@ class OthelloGame(Game):
                 self.goGame.game.gm._captured_groups = copy.deepcopy(board._captured_groups)
                 self.goGame.game.gm._num_captured_stones = copy.deepcopy(board._num_captured_stones)
                 self.goGame.game.gm._ko = copy.deepcopy(board._ko)
-        legalMoves = self.Diff(legalMoves, ilegalMoves)  
+        legalMoves = self.Diff(legalMoves, ilegalMoves) 
+        valids[-1]=1 #fixed ending logic: can pass at any time 
         if len(legalMoves)==0:
-            valids[-1]=1
             return np.array(valids)
         for x, y in legalMoves:
             valids[self.n*x+y]=1
