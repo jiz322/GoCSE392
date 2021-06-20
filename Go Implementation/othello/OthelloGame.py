@@ -71,29 +71,29 @@ class OthelloGame(Game):
         #load necessary fields back to the board
         board = copy.deepcopy(self.goGame.game.board)
         board.previous_is_pass = False
+        board.turns += 1
         board._group_map = copy.deepcopy(self.goGame.game.gm._group_map)
         board._captured_groups = copy.deepcopy(self.goGame.game.gm._captured_groups)
         board._num_captured_stones = copy.deepcopy(self.goGame.game.gm._num_captured_stones)
 
         #bug log
-        print("captured groups", self.goGame.game.gm._captured_groups)
-        #print(self.goGame.game.board)
+        #print("turns", board.turns)
+        print(self.goGame.game.board)
         #print(board._group_map)
         return (copy.deepcopy(board), -player) #^
 
     def getValidMoves(self, board, player):
-        print('here')
-        print('turn for '+ str(player))
+        #print('here')
+        #print('turn for '+ str(player))
         #initialize a valids list contains all actions
         valids = [0]*self.getActionSize() #keep
 
         #load board properities into tempGame
-        tempGame = copy.deepcopy(self.goGame)
-        tempGame.game.board = copy.deepcopy(board) #^
-        tempGame.game.gm = GroupManager(self.goGame.game.board, enable_self_destruct=False)
-        tempGame.game.gm._group_map = copy.deepcopy(board._group_map)
-        tempGame.game.gm._captured_groups = copy.deepcopy(board._captured_groups)
-        tempGame.game.gm._num_captured_stones = copy.deepcopy(board._num_captured_stones)
+        self.goGame.game.board = copy.deepcopy(board)
+        self.goGame.game.gm = GroupManager(self.goGame.game.board, enable_self_destruct=False)
+        self.goGame.game.gm._group_map = copy.deepcopy(board._group_map)
+        self.goGame.game.gm._captured_groups = copy.deepcopy(board._captured_groups)
+        self.goGame.game.gm._num_captured_stones = copy.deepcopy(board._num_captured_stones)
  
 
         # Construct all possible tuples, then filter away ilegals
@@ -101,35 +101,34 @@ class OthelloGame(Game):
         y = [0, 1, 2, 3, 4, 5, 6, 7, 8]
         legalMoves = [ (a,b) for a in x for b in y]
         ilegalMoves = [] 
-        print(board)
+        #print(board)
+        #print(tempGame.game.gm.board)
         for x, y in legalMoves:
-            print((x,y))
-            legal = tempGame._place_stone((x, y), player)
+            #print((x,y))
+            legal = self.goGame._place_stone((x,y), player)
             if legal == False:
-                print('ilegal')
+                #print('ilegal')
                 ilegalMoves.append((x,y))
-                tempGame = copy.deepcopy(self.goGame)
-                tempGame.game.board = copy.deepcopy(board)
-                tempGame.game.gm = GroupManager(self.goGame.game.board, enable_self_destruct=False)
-                tempGame.game.gm._group_map = copy.deepcopy(board._group_map)
-                tempGame.game.gm._captured_groups = copy.deepcopy(board._captured_groups)
-                tempGame.game.gm._num_captured_stones = copy.deepcopy(board._num_captured_stones)
+                self.goGame.game.board = copy.deepcopy(board)
+                self.goGame.game.gm = GroupManager(self.goGame.game.board, enable_self_destruct=False)
+                self.goGame.game.gm._group_map = copy.deepcopy(board._group_map)
+                self.goGame.game.gm._captured_groups = copy.deepcopy(board._captured_groups)
+                self.goGame.game.gm._num_captured_stones = copy.deepcopy(board._num_captured_stones)
             else:
-                print('legal')
-                tempGame = copy.deepcopy(self.goGame)
-                tempGame.game.board = copy.deepcopy(board)
-                tempGame.game.gm = GroupManager(self.goGame.game.board, enable_self_destruct=False)
-                tempGame.game.gm._group_map = copy.deepcopy(board._group_map)
-                tempGame.game.gm._captured_groups = copy.deepcopy(board._captured_groups)
-                tempGame.game.gm._num_captured_stones = copy.deepcopy(board._num_captured_stones)
+                #print('legal')
+                self.goGame.game.board = copy.deepcopy(board)
+                self.goGame.game.gm = GroupManager(self.goGame.game.board, enable_self_destruct=False)
+                self.goGame.game.gm._group_map = copy.deepcopy(board._group_map)
+                self.goGame.game.gm._captured_groups = copy.deepcopy(board._captured_groups)
+                self.goGame.game.gm._num_captured_stones = copy.deepcopy(board._num_captured_stones)
         legalMoves = self.Diff(legalMoves, ilegalMoves)  
         if len(legalMoves)==0:
             valids[-1]=1
             return np.array(valids)
         for x, y in legalMoves:
             valids[self.n*x+y]=1
-        print(np.array(valids))
-        print('here, hopefully')
+        #print(np.array(valids))
+        #print('here, hopefully')
         return np.array(valids)
 
     def getGameEnded(self, board, player):
@@ -167,7 +166,23 @@ class OthelloGame(Game):
 
     def getCanonicalForm(self, board, player):
         # return state if player==1, else return -state if player==-1
-        return player*board
+        #change of board
+        board = player*board
+        #change of _group_map:  reverse  _group_map[0][1].stone
+        row = 9
+        col = 9
+        for j in range(col):
+            for i in range(row):
+                if board._group_map[i][j] is not None:
+                    board._group_map[i][j].stone = board._group_map[i][j].stone*(-1)
+
+        #change of _num_captured_stones: reverse it
+        temp = board._num_captured_stones.get(-1)
+        board._num_captured_stones[-1] = board._num_captured_stones[1]
+        board._num_captured_stones[1] = temp
+
+
+        return board
 
     def getSymmetries(self, board, pi):
         # mirror, rotational
