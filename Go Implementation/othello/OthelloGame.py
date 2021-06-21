@@ -45,7 +45,7 @@ class OthelloGame(Game):
         return self.n*self.n+1 #9*9+1
 
     def getNextState(self, board, player, action):
-        print(action)
+        #print(action)
         # if player takes action on board, return next (board,player)
         # ###action must be a valid move
 
@@ -80,7 +80,7 @@ class OthelloGame(Game):
 
         #bug log
         #print("turns", board.turns)
-        print(self.goGame.game.board)
+        #print(self.goGame.game.board)
         #print(board._group_map)
         return (copy.deepcopy(board), -player) #^
 
