@@ -156,14 +156,14 @@ class OthelloGame(Game):
         #print('self.goGame.game.board.pre_previous_is_pass')
         if ((self.goGame.game.board.previous_is_pass and self.goGame.game.board.pre_previous_is_pass) or board.turns > self.n*self.n*3/2):
             #print('enddd')
-            print(board)
+            #print(board)
             diff = self.goGame.game.get_scores().get(player)>self.goGame.game.get_scores().get(-player)
             #print(self.goGame.game.board)
             if diff > 0:
-                print("current player win")
+                #print("current player win")
                 return 1
             else:
-                print("oppo player win")
+                #print("oppo player win")
                 return -1
         else:
           #  print('not end')
