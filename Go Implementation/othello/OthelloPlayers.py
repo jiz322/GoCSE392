@@ -24,6 +24,7 @@ class HumanOthelloPlayer():
         #    if valid[i]:
         #        print("[", int(i/self.game.n), int(i%self.game.n), end="] ")
         while True:
+            print('input two digits seperated by space or pass')
             input_move = input()
             input_a = input_move.split(" ")
             if len(input_a) == 2:
@@ -37,6 +38,9 @@ class HumanOthelloPlayer():
                 except ValueError:
                     # Input needs to be an integer
                     'Invalid integer'
+            if len(input_a) == 1:
+                a = board.board_size*board.board_size
+                break
             print('Invalid move')
         return a
 
