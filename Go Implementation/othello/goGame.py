@@ -115,7 +115,7 @@ class GoGame():
                  }
         traversed = make_2d_array(self.board_size, self.board_size,
                                   default=lambda: False)
-
+                                  
         def traverse(y, x):
             traversed[y][x] = True
             search = [(y, x)]
@@ -147,9 +147,15 @@ class GoGame():
                     score, stone = traverse(y, x)
                     if stone is not None and stone != Stone.EMPTY:
                         scores[stone] += score
+        for y in range(self.board_size):
+            for x in range(self.board_size):
+                if self.board[y, x] == 1:
+                    scores[Stone.BLACK] += 1
+                if self.board[y, x] == -1:
+                    scores[Stone.WHITE] += 1
+        #scores[Stone.BLACK] -= self.num_black_captured
+        #scores[Stone.WHITE] -= self.num_white_captured
 
-        scores[Stone.BLACK] -= self.num_black_captured
-        scores[Stone.WHITE] -= self.num_white_captured
         return scores
 
 
