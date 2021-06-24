@@ -158,7 +158,7 @@ class OthelloGame(Game):
         if ((self.goGame.game.board.previous_is_pass and self.goGame.game.board.pre_previous_is_pass) or board.turns > self.n*self.n*3/2):
             #print('enddd')
             #print(board)
-            diff = self.goGame.game.get_scores().get(player)>self.goGame.game.get_scores().get(-player)
+            diff = self.goGame.game.get_scores().get(player) - self.goGame.game.get_scores().get(-player)
             #print(self.goGame.game.board)
             if board.turns%2 and diff > -6:
                 #print("current player win")
