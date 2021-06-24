@@ -118,7 +118,7 @@ class Coach():
                           lambda x: np.argmax(nmcts.getActionProb(x, temp=0)), self.game)
             pwins, nwins, draws, pwins_black = arena.playGames(self.args.arenaCompare)
 
-            log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d ; PREV_WinOnBlack' % (nwins, pwins, draws, pwins_black))
+            log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d ; PREV_WinOnBlack : %d' % (nwins, pwins, draws, pwins_black))
             if pwins + nwins == 0 or float(nwins) / (pwins + nwins) < self.args.updateThreshold:
                 log.info('REJECTING NEW MODEL')
                 self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
