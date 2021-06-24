@@ -78,12 +78,14 @@ class Arena():
 
         num = int(num / 2)
         oneWon = 0
+        oneWonOnBlack = 0
         twoWon = 0
         draws = 0
         for _ in tqdm(range(num), desc="Arena.playGames (1)"):
             gameResult = self.playGame(verbose=verbose)
             if gameResult == 1:
                 oneWon += 1
+                oneWonOnBlack +=1
             elif gameResult == -1:
                 twoWon += 1
             else:
@@ -100,4 +102,4 @@ class Arena():
             else:
                 draws += 1
 
-        return oneWon, twoWon, draws
+        return oneWon, twoWon, draws, oneWonOnBlack
