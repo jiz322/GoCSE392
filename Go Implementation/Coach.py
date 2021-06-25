@@ -107,11 +107,14 @@ class Coach():
 
             # training new network, keeping a copy of the old one
             self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
-            self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
-            pmcts = MCTS(self.game, self.pnet, self.args)
+            ####self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')   #load the best one not the old
+            ####pmcts = MCTS(self.game, self.pnet, self.args)
 
             self.nnet.train(trainExamples)
             nmcts = MCTS(self.game, self.nnet, self.args)
+
+            self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')   #load the best one not the old
+            pmcts = MCTS(self.game, self.pnet, self.args)
 
             log.info('PITTING AGAINST PREVIOUS VERSION')
             arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=0)),
