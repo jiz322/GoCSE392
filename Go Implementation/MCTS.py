@@ -37,10 +37,12 @@ class MCTS():
         
         for i in range(self.args.numMCTSSims):
             self.search(canonicalBoard)
-
         s = self.game.stringRepresentation(canonicalBoard)
         counts = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in range(self.game.getActionSize())]
-
+        # For go, the highest NSA may not a legal move due to the rule of 'ko' 
+        # Then, we mask it 0.
+        valids = self.game.getValidMoves(canonicalBoard, 1)
+        counts = counts * valids 
         if temp == 0:
             bestAs = np.array(np.argwhere(counts == np.max(counts))).flatten()
             bestA = np.random.choice(bestAs)
@@ -55,8 +57,10 @@ class MCTS():
 
         if counts_sum != 0:
             probs = [x / counts_sum for x in counts]
-        #else:
-        #    probs = [1 / len(counts) for x in counts]
+        #vary rare, but it may happen due to the 'ko'
+        else:
+            probs = [0 for x in counts]
+            probs[-1] = 1
         return probs
 
     def search(self, canonicalBoard):
