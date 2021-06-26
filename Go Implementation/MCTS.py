@@ -43,6 +43,9 @@ class MCTS():
         if arena == 1:
             for i in range(self.args.arenaNumMCTSSims):
                 self.search(canonicalBoard, False)
+        if training == 0 and arena == 0:
+            for i in range(self.args.numMCTSSims):
+                self.search(canonicalBoard, False)
 
         s = self.game.stringRepresentation(canonicalBoard)
         counts = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in range(self.game.getActionSize())]
