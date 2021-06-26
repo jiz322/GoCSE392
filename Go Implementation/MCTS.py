@@ -25,7 +25,8 @@ class MCTS():
         self.Es = {}  # stores game.getGameEnded ended for board s
         self.Vs = {}  # stores game.getValidMoves for board s
 
-    def getActionProb(self, canonicalBoard, temp=1):
+    #Noice only add to training mode
+    def getActionProb(self, canonicalBoard, temp=1, training=0, arena=0):
         """
         This function performs numMCTSSims simulations of MCTS starting from
         canonicalBoard.
@@ -34,19 +35,24 @@ class MCTS():
             probs: a policy vector where the probability of the ith action is
                    proportional to Nsa[(s,a)]**(1./temp)
         """
-        
-        for i in range(self.args.numMCTSSims):
-            self.search(canonicalBoard)
+        fastDecision = int(0.2*self.args.numMCTSSims)
+        noised_numMCTSSims = np.random.choice([self.args.numMCTSSims, fastDecision], p=[0.25, 0.75])
+        if training == 1:
+            for i in range(noised_numMCTSSims):
+                self.search(canonicalBoard, noised_numMCTSSims == fastDecision)
+        if arena == 1:
+            for i in range(self.args.arenaNumMCTSSims):
+                self.search(canonicalBoard, False)
 
         s = self.game.stringRepresentation(canonicalBoard)
         counts = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in range(self.game.getActionSize())]
-
+        isFast = (noised_numMCTSSims == fastDecision)
         if temp == 0:
             bestAs = np.array(np.argwhere(counts == np.max(counts))).flatten()
             bestA = np.random.choice(bestAs)
             probs = [0] * len(counts)
             probs[bestA] = 1
-            return probs
+            return probs, isFast
         #print(counts)
         counts = [x ** (1. / temp) for x in counts]
         #print(counts)
@@ -62,9 +68,12 @@ class MCTS():
             probs = [x / counts_sum for x in counts]
         else:
             probs = [1 / len(counts) for x in counts]
-        return probs
 
-    def search(self, canonicalBoard):
+
+        return probs, isFast
+
+    #For fastDecision, no further noise add to p
+    def search(self, canonicalBoard, fastDecision=False):
         """
         This function performs one iteration of MCTS. It is recursively called
         till a leaf node is found. The action chosen at each node is one that
@@ -110,11 +119,17 @@ class MCTS():
             #print(canonicalBoard)
             # leaf node
             self.Ps[s], v = self.nnet.predict(canonicalBoard)
+
             #print('nn')
             #print(canonicalBoard)
             valids = self.game.getValidMoves(canonicalBoard, 1)
-            #print('valid')
-            #print(canonicalBoard)  
+            valid_length = len(self.Ps[s]) - np.count_nonzero(self.Ps[s]==0)
+            if not fastDecision:
+                #print(self.Ps[s])
+                #print(self.Ps[s][0])
+                self.Ps[s] = 0.75*self.Ps[s] + 0.25*np.random.dirichlet([0.03*canonicalBoard.board_size**2/valid_length]*len(self.Ps[s]))
+                #print(newPs)
+                #print(0.25*np.random.dirichlet([0.03*canonicalBoard.board_size**2/valid_length]*len(self.Ps[s])))
             self.Ps[s] = self.Ps[s] * valids  # masking invalid moves
             sum_Ps_s = np.sum(self.Ps[s])
             
@@ -135,6 +150,7 @@ class MCTS():
 
             self.Vs[s] = valids
             self.Ns[s] = 0
+            #print(canonicalBoard)
             return -v
 
         valids = self.Vs[s]

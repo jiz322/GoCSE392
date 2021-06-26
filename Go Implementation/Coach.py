@@ -55,10 +55,11 @@ class Coach():
             canonicalBoard = self.game.getCanonicalForm(board, self.curPlayer)
             temp = int(episodeStep < self.args.tempThreshold)
 
-            pi = self.mcts.getActionProb(canonicalBoard, temp=temp)
+            pi, fastDecision = self.mcts.getActionProb(canonicalBoard, temp=temp, training=1)
             sym = self.game.getSymmetries(canonicalBoard, pi)
             for b, p in sym:
-                trainExamples.append([b, self.curPlayer, p, None])
+                if not fastDecision:  #only add example of slow decisions
+                    trainExamples.append([b, self.curPlayer, p, None])
 
             action = np.random.choice(len(pi), p=pi)
             board, self.curPlayer = self.game.getNextState(board, self.curPlayer, action)
@@ -114,8 +115,8 @@ class Coach():
             nmcts = MCTS(self.game, self.nnet, self.args)
 
             log.info('PITTING AGAINST PREVIOUS VERSION')
-            arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=0)),
-                          lambda x: np.argmax(nmcts.getActionProb(x, temp=0)), self.game)
+            arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=0, arena=1)[0]),
+                          lambda x: np.argmax(nmcts.getActionProb(x, temp=0, arena=1)[0]), self.game)
             pwins, nwins, draws, pwins_black = arena.playGames(self.args.arenaCompare)
 
             log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d ; PREV_WinOnBlack : %d' % (nwins, pwins, draws, pwins_black))
