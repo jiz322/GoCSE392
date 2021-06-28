@@ -35,26 +35,33 @@ class MCTS():
             probs: a policy vector where the probability of the ith action is
                    proportional to Nsa[(s,a)]**(1./temp)
         """
+        ## Rest the Tree here!!!!!!!
+        self.__init__(self.game, self.nnet, self.args) #make the noise
+
         fastDecision = int(0.2*self.args.numMCTSSims)
         noised_numMCTSSims = np.random.choice([self.args.numMCTSSims, fastDecision], p=[0.25, 0.75])
+        isFast = (noised_numMCTSSims == fastDecision)
         if training == 1:
-            for i in range(noised_numMCTSSims):
-                self.search(canonicalBoard, noised_numMCTSSims == fastDecision)
+            for i in range(noised_numMCTSSims, noise=isFast):
+                self.search(canonicalBoard, isFast)
         if arena == 1:
             for i in range(self.args.arenaNumMCTSSims):
-                self.search(canonicalBoard, False)
+                self.search(canonicalBoard, noise=False)
         if training == 0 and arena == 0:
+            #print(isFast)
             for i in range(self.args.numMCTSSims):
-                self.search(canonicalBoard, False)
+                self.search(canonicalBoard, noise=False)
 
         s = self.game.stringRepresentation(canonicalBoard)
         counts = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in range(self.game.getActionSize())]
-        isFast = (noised_numMCTSSims == fastDecision)
+        #print(counts)
+        #print([self.Qsa[(s, a)] if (s, a) in self.Qsa else 0 for a in range(self.game.getActionSize())])
+
         if temp == 0:
             bestAs = np.array(np.argwhere(counts == np.max(counts))).flatten()
             bestA = np.random.choice(bestAs)
             probs = [0] * len(counts)
-            probs[bestA] = 1
+            probs[bestA] = 1           
             return probs, isFast
         #print(counts)
         counts = [x ** (1. / temp) for x in counts]
@@ -76,7 +83,7 @@ class MCTS():
         return probs, isFast
 
     #For fastDecision, no further noise add to p
-    def search(self, canonicalBoard, fastDecision=False):
+    def search(self, canonicalBoard, noise=True):
         """
         This function performs one iteration of MCTS. It is recursively called
         till a leaf node is found. The action chosen at each node is one that
@@ -127,7 +134,8 @@ class MCTS():
             #print(canonicalBoard)
             valids = self.game.getValidMoves(canonicalBoard, 1)
             valid_length = len(self.Ps[s]) - np.count_nonzero(self.Ps[s]==0)
-            if not fastDecision:
+            if noise:
+                #print("here")
                 #print(self.Ps[s])
                 #print(self.Ps[s][0])
                 self.Ps[s] = 0.75*self.Ps[s] + 0.25*np.random.dirichlet([0.03*canonicalBoard.board_size**2/valid_length]*len(self.Ps[s]))
@@ -183,7 +191,7 @@ class MCTS():
         next_s = self.game.getCanonicalForm(next_s, next_player)
         #print("CanonicalForm")
         #print(next_s)
-        v = self.search(next_s)
+        v = self.search(next_s, noise=False) #keta Paper: noise only add to root
 
         if (s, a) in self.Qsa:
             self.Qsa[(s, a)] = (self.Nsa[(s, a)] * self.Qsa[(s, a)] + v) / (self.Nsa[(s, a)] + 1)
