@@ -100,6 +100,14 @@ class Coach():
             # NB! the examples were collected using the model from the previous iteration, so (i-1)  
             self.saveTrainExamples(i - 1)
 
+
+
+
+            #####Do you want to load TrainExamples here?
+
+
+
+
             # shuffle examples before training
             trainExamples = []
             for e in self.trainExamplesHistory:
@@ -115,8 +123,8 @@ class Coach():
             nmcts = MCTS(self.game, self.nnet, self.args)
 
             log.info('PITTING AGAINST PREVIOUS VERSION')
-            arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=0, arena=1)[0]),
-                          lambda x: np.argmax(nmcts.getActionProb(x, temp=0, arena=1)[0]), self.game)
+            arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=1, arena=1)[0]),
+                          lambda x: np.argmax(nmcts.getActionProb(x, temp=1, arena=1)[0]), self.game)
             pwins, nwins, draws, pwins_black = arena.playGames(self.args.arenaCompare)
 
             log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d ; PREV_WinOnBlack : %d' % (nwins, pwins, draws, pwins_black))
