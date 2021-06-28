@@ -25,7 +25,7 @@ class MCTS():
         self.Es = {}  # stores game.getGameEnded ended for board s
         self.Vs = {}  # stores game.getValidMoves for board s
 
-    #Noice only add to training mode
+    # Noise only add to training mode (not for Arena Nor pit)
     def getActionProb(self, canonicalBoard, temp=1, training=0, arena=0):
         """
         This function performs numMCTSSims simulations of MCTS starting from
@@ -35,16 +35,19 @@ class MCTS():
             probs: a policy vector where the probability of the ith action is
                    proportional to Nsa[(s,a)]**(1./temp)
         """
-        ## Rest the Tree here!!!!!!!
-        self.__init__(self.game, self.nnet, self.args) #make the noise
-
-        fastDecision = int(0.2*self.args.numMCTSSims)
+        ## Reset the Tree here!!!!!!!
+        self.__init__(self.game, self.nnet, self.args) #to make the Arena work as expected instead of a large single tree.
+        #Add noise Improve the quality of sample (see Keta-Go paper)  
+        # 25% of all do as many as numMCTSS searches, 75% do a quick search
+        # Quick search add no noise
+        # Only slow searches are recorded, so return isFast and pass it to Coach
+        fastDecision = int(0.2*self.args.numMCTSSims)                                          
         noised_numMCTSSims = np.random.choice([self.args.numMCTSSims, fastDecision], p=[0.25, 0.75])
         isFast = (noised_numMCTSSims == fastDecision)
-        if training == 1:
-            for i in range(noised_numMCTSSims, noise=isFast):
-                self.search(canonicalBoard, isFast)
-        if arena == 1:
+        if training == 1: # in self-iteration
+            for i in range(noised_numMCTSSims):
+                self.search(canonicalBoard, noise=not isFast) # Dirichlet noise only in slow decision
+        if arena == 1: # in arena
             for i in range(self.args.arenaNumMCTSSims):
                 self.search(canonicalBoard, noise=False)
         if training == 0 and arena == 0:
@@ -67,11 +70,6 @@ class MCTS():
         counts = [x ** (1. / temp) for x in counts]
         #print(counts)
         counts_sum = float(sum(counts))
-
-
-        ##############
-        #To AVOID DIVIDBYZERO, ADD THE FOLLOWING LOGIC
-        ##########
 
 
         if counts_sum != 0:
@@ -134,7 +132,7 @@ class MCTS():
             #print(canonicalBoard)
             valids = self.game.getValidMoves(canonicalBoard, 1)
             valid_length = len(self.Ps[s]) - np.count_nonzero(self.Ps[s]==0)
-            if noise:
+            if noise: # add dirichlet noise to the root policy
                 #print("here")
                 #print(self.Ps[s])
                 #print(self.Ps[s][0])
@@ -191,7 +189,7 @@ class MCTS():
         next_s = self.game.getCanonicalForm(next_s, next_player)
         #print("CanonicalForm")
         #print(next_s)
-        v = self.search(next_s, noise=False) #keta Paper: noise only add to root
+        v = self.search(next_s, noise=False) #keta Paper: dirichlet noise only add to root
 
         if (s, a) in self.Qsa:
             self.Qsa[(s, a)] = (self.Nsa[(s, a)] * self.Qsa[(s, a)] + v) / (self.Nsa[(s, a)] + 1)
