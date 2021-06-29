@@ -121,7 +121,7 @@ class Coach():
                 log.info('REJECTING NEW MODEL')
                  #load the current best and examples after reject
                 self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
-                self.loadTrainExamples(loadBest=True)
+                #self.loadTrainExamples(loadBest=True)
             else:
                 log.info('ACCEPTING NEW MODEL')
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
