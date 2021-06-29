@@ -21,7 +21,7 @@ class Coach():
     """
 
     def __init__(self, game, nnet, args):
-        self.firstIter = True
+        self.firstIter = args.firstIter #set true if it produce first chechpoint to save
         self.game = game
         self.nnet = nnet
         self.pnet = self.nnet.__class__(self.game)  # the competitor network
@@ -106,10 +106,7 @@ class Coach():
             for e in self.trainExamplesHistory:
                 trainExamples.extend(e)
             shuffle(trainExamples)
-            self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')# training new network, keeping a copy of the old one
-            if self.firstIter:
-                self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar') #Compete with temp
-                pmcts = MCTS(self.game, self.pnet, self.args)                
+            self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')# training new network, keeping a copy of the old one              
             self.nnet.train(trainExamples)
             nmcts = MCTS(self.game, self.nnet, self.args)
             if not self.firstIter:
@@ -122,9 +119,10 @@ class Coach():
                 log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d ; PREV_WinOnBlack : %d' % (nwins, pwins, draws, pwins_black))
                 if pwins + nwins == 0 or float(nwins) / (pwins + nwins) < self.args.updateThreshold:
                     log.info('REJECTING NEW MODEL')
-                    #load the current best and examples after reject
+                    #load the current best after reject
                     self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
-                    self.loadTrainExamples(loadBest=True)
+                    #self.loadTrainExamples(loadBest=True) 
+                    # Keep the example the same!!!!!!!
                 else:
                     log.info('ACCEPTING NEW MODEL')
                     self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))

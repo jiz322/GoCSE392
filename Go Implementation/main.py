@@ -21,6 +21,7 @@ args = dotdict({
     'arenaCompare': 4,         # Number of games to play during arena play to determine if new net will be accepted.
     'cpuct': 1.1,
     'arenaNumMCTSSims': 60,
+    'firstIter': True,        #set true if it produce first chechpoint to save, for multuprocess, the following has to be FALSE
 
     'checkpoint': './temp/',
     'load_model': True,
