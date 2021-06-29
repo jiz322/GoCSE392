@@ -106,15 +106,14 @@ class Coach():
             for e in self.trainExamplesHistory:
                 trainExamples.extend(e)
             shuffle(trainExamples)
+            self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')# training new network, keeping a copy of the old one
             if self.firstIter:
                 self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar') #Compete with temp
                 pmcts = MCTS(self.game, self.pnet, self.args)                
-            # training new network, keeping a copy of the old one
-            self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
             self.nnet.train(trainExamples)
             nmcts = MCTS(self.game, self.nnet, self.args)
             if not self.firstIter:
-                self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar') #Compete with best
+                self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar') #Load the best after training to maximize efficenty
                 pmcts = MCTS(self.game, self.pnet, self.args)
                 log.info('PITTING AGAINST PREVIOUS VERSION')
                 arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=1, arena=1)[0]),
@@ -131,7 +130,6 @@ class Coach():
                     self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
                     self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
                     self.saveTrainExamples(0, saveBest=True) #save as best.pth.tar.example
-                self.firstIter = False
             else:
                 self.firstIter = False
                 log.info('ACCEPTING NEW MODEL')
