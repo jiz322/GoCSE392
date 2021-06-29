@@ -117,26 +117,29 @@ class Coach():
             self.nnet.train(trainExamples)
             nmcts = MCTS(self.game, self.nnet, self.args)
 
-            self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')   #load the best one not the old
-            pmcts = MCTS(self.game, self.pnet, self.args)
+
             if not self.firstIter:
+                self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')   #load the best one not the old
+                pmcts = MCTS(self.game, self.pnet, self.args)
                 self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar') #Compete with best
                 pmcts = MCTS(self.game, self.pnet, self.args)
-            self.firstIter = False
-
-            log.info('PITTING AGAINST PREVIOUS VERSION')
-            arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=0)),
-                          lambda x: np.argmax(nmcts.getActionProb(x, temp=0)), self.game)
-            pwins, nwins, draws, pwins_black = arena.playGames(self.args.arenaCompare)
-
-            log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d ; PREV_WinOnBlack : %d' % (nwins, pwins, draws, pwins_black))
-            if pwins + nwins == 0 or float(nwins) / (pwins + nwins) < self.args.updateThreshold:
-                log.info('REJECTING NEW MODEL')
-                self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
+                log.info('PITTING AGAINST PREVIOUS VERSION')
+                arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=1)),
+                          lambda x: np.argmax(nmcts.getActionProb(x, temp=1)), self.game)
+                pwins, nwins, draws, pwins_black = arena.playGames(self.args.arenaCompare)            
+                log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d ; PREV_WinOnBlack : %d' % (nwins, pwins, draws, pwins_black))
+                if pwins + nwins == 0 or float(nwins) / (pwins + nwins) < self.args.updateThreshold:
+                    log.info('REJECTING NEW MODEL')
+                    self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
+                else:
+                    log.info('ACCEPTING NEW MODEL')
+                    self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
+                    self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
             else:
                 log.info('ACCEPTING NEW MODEL')
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
+                self.firstIter = False
 
     def getCheckpointFile(self, iteration):
         return 'checkpoint_' + str(iteration) + '.pth.tar'
