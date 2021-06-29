@@ -120,7 +120,7 @@ class Coach():
             if pwins + nwins == 0 or float(nwins) / (pwins + nwins) < self.args.updateThreshold:
                 log.info('REJECTING NEW MODEL')
                  #load the current best and examples after reject
-                self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
+                self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
                 #self.loadTrainExamples(loadBest=True)
             else:
                 log.info('ACCEPTING NEW MODEL')
