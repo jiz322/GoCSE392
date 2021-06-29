@@ -113,7 +113,7 @@ class Coach():
             self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
             self.nnet.train(trainExamples)
             nmcts = MCTS(self.game, self.nnet, self.args)
-            if not firstIter:
+            if not self.firstIter:
                 self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar') #Compete with best
                 pmcts = MCTS(self.game, self.pnet, self.args)
             self.firstIter = False
