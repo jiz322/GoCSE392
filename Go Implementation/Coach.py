@@ -84,14 +84,11 @@ class Coach():
             # examples of the iteration
             if not self.skipFirstSelfPlay or i > 1:
                 iterationTrainExamples = deque([], maxlen=self.args.maxlenOfQueue)
-
                 for _ in tqdm(range(self.args.numEps), desc="Self Play"):
                     self.mcts = MCTS(self.game, self.nnet, self.args)  # reset search tree
                     iterationTrainExamples += self.executeEpisode()
-
                 # save the iteration examples to the history 
                 self.trainExamplesHistory.append(iterationTrainExamples)
-
             if len(self.trainExamplesHistory) > self.args.numItersForTrainExamplesHistory:
                 log.warning(
                     f"Removing the oldest entry in trainExamples. len(trainExamplesHistory) = {len(self.trainExamplesHistory)}")
@@ -105,19 +102,13 @@ class Coach():
             for e in self.trainExamplesHistory:
                 trainExamples.extend(e)
             shuffle(trainExamples)
-
             if self.firstIter:
                 self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar') #Compete with temp
                 pmcts = MCTS(self.game, self.pnet, self.args)         
             # training new network, keeping a copy of the old one
             self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
-            ####self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')   #load the best one not the old
-            ####pmcts = MCTS(self.game, self.pnet, self.args)
-
             self.nnet.train(trainExamples)
             nmcts = MCTS(self.game, self.nnet, self.args)
-
-
             if not self.firstIter:
                 self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')   #load the best one not the old
                 pmcts = MCTS(self.game, self.pnet, self.args)
