@@ -21,6 +21,7 @@ class Coach():
     """
 
     def __init__(self, game, nnet, args):
+        self.firstIter = True
         self.game = game
         self.nnet = nnet
         self.pnet = self.nnet.__class__(self.game)  # the competitor network
@@ -105,13 +106,17 @@ class Coach():
             for e in self.trainExamplesHistory:
                 trainExamples.extend(e)
             shuffle(trainExamples)
-
+            if self.firstIter:
+                self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar') #Compete with temp
+                pmcts = MCTS(self.game, self.pnet, self.args)                
             # training new network, keeping a copy of the old one
             self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
             self.nnet.train(trainExamples)
             nmcts = MCTS(self.game, self.nnet, self.args)
-            self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar') #Compete with best
-            pmcts = MCTS(self.game, self.pnet, self.args)
+            if not firstIter:
+                self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar') #Compete with best
+                pmcts = MCTS(self.game, self.pnet, self.args)
+            self.firstIter = False
             log.info('PITTING AGAINST PREVIOUS VERSION')
             arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=1, arena=1)[0]),
                           lambda x: np.argmax(nmcts.getActionProb(x, temp=1, arena=1)[0]), self.game)
