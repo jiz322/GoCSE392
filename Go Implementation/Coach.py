@@ -121,8 +121,6 @@ class Coach():
             if not self.firstIter:
                 self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')   #load the best one not the old
                 pmcts = MCTS(self.game, self.pnet, self.args)
-                self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar') #Compete with best
-                pmcts = MCTS(self.game, self.pnet, self.args)
                 log.info('PITTING AGAINST PREVIOUS VERSION')
                 arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=1)),
                           lambda x: np.argmax(nmcts.getActionProb(x, temp=1)), self.game)
