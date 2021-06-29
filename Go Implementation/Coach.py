@@ -76,6 +76,10 @@ class Coach():
         examples in trainExamples (which has a maximum length of maxlenofQueue).
         It then pits the new neural network against the old one and accepts it
         only if it wins >= updateThreshold fraction of games.
+
+        Go edit:
+        load best.pth.tar to compare and self-iteration
+        temp.pth.tar only for training. it may be overwrite shortly
         """
 
         for i in range(1, self.args.numIters + 1):
@@ -102,15 +106,12 @@ class Coach():
             for e in self.trainExamplesHistory:
                 trainExamples.extend(e)
             shuffle(trainExamples)
-            if self.firstIter:
-                self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar') #Compete with temp
-                pmcts = MCTS(self.game, self.pnet, self.args)         
-            # training new network, keeping a copy of the old one
-            self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
+             # training new network, keeping a copy of the old one
+            self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')       
             self.nnet.train(trainExamples)
             nmcts = MCTS(self.game, self.nnet, self.args)
             if not self.firstIter:
-                self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')   #load the best one not the old
+                self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')   #have best at 2dn iteration
                 pmcts = MCTS(self.game, self.pnet, self.args)
                 log.info('PITTING AGAINST PREVIOUS VERSION')
                 arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=1)),
@@ -124,8 +125,7 @@ class Coach():
                     log.info('ACCEPTING NEW MODEL')
                     self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
                     self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
-                self.firstIter = False
-            else:
+            else: #first iteratioin, just accept it so that we have best.pth.tar
                 log.info('ACCEPTING NEW MODEL')
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
