@@ -120,7 +120,7 @@ class Coach():
                 log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d ; PREV_WinOnBlack : %d' % (nwins, pwins, draws, pwins_black))
                 if pwins + nwins == 0 or float(nwins) / (pwins + nwins) < self.args.updateThreshold:
                     log.info('REJECTING NEW MODEL')
-                    self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
+                    self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar') # load best nn after reject, keep example
                 else:
                     log.info('ACCEPTING NEW MODEL')
                     self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
