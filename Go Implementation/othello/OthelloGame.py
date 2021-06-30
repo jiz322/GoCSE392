@@ -138,45 +138,23 @@ class OthelloGame(Game):
         #print('here, hopefully')
         return np.array(valids)
 
-    def getGameEnded(self, board, player):
-        
-        
-        # return 0 if not ended, 1 if player 1 won, -1 if player 1 lost
-        # player = 1
-        #b = Board(self.n)
-        #b.pieces = np.copy(board)
-        ##goGame = GameUI() #^
-        self.goGame.game.board = board#^
-        #print(goGame.game.board)       debug
-        #end with 2 consective passes
-        # 
-        #Black should win when 43:38 (5 points higher) 
-        #for simplicity, whoever get 41 will win
-        #print('self.goGame.game.board.previous_is_pass')
-        #print(self.goGame.game.board.previous_is_pass)
-        #print(self.goGame.game.board.pre_previous_is_pass)
-        #print('self.goGame.game.board.pre_previous_is_pass')
+    def getGameEnded(self, board, player):  
+        self.goGame.game.board = board
         if ((self.goGame.game.board.previous_is_pass and self.goGame.game.board.pre_previous_is_pass) or board.turns > self.n*self.n*3):
-            #print('enddd')
-            #print(board)
             diff = self.goGame.game.get_scores().get(player) - self.goGame.game.get_scores().get(-player)
-            #print(self.goGame.game.board)
             if not self.balanced:
                 if diff > 0:
-                    return 1
+                    return 1, diff
                 else:
-                    return -1
+                    return -1, diff
             if board.turns%2 and diff > -6:
-                #print("current player win")
-                return 1
+                return 1, diff
             elif diff > 6 and not board.turns%2:
-                return 1
+                return 1, diff
             else:
-                #print("oppo player win")
-                return -1
+                return -1, diff
         else:
-          #  print('not end')
-            return 0
+            return 0, 0
 
 
     def getCanonicalForm(self, board, player):

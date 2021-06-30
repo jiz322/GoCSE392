@@ -1,6 +1,7 @@
 import logging
 
 from tqdm import tqdm
+import math
 
 log = logging.getLogger(__name__)
 
@@ -41,16 +42,14 @@ class Arena():
         curPlayer = 1
         board = self.game.getInitBoard()
         it = 0
-        while self.game.getGameEnded(board, curPlayer) == 0:
+        while self.game.getGameEnded(board, curPlayer)[0] == 0:
             it += 1
             if verbose:
                 assert self.display
                 print("Turn ", str(it), "Player ", str(curPlayer))
                 self.display(board)
             action = players[curPlayer + 1](self.game.getCanonicalForm(board, curPlayer))
-
             valids = self.game.getValidMoves(self.game.getCanonicalForm(board, curPlayer), 1)
-
             if valids[action] == 0:
                 log.error(f'Action {action} is not valid!')
                 log.debug(f'valids = {valids}')
@@ -61,10 +60,11 @@ class Arena():
             board, curPlayer = self.game.getNextState(board, curPlayer, action)
         if verbose:
             assert self.display
-            print("Game over: Turn ", str(it), "Result ", str(self.game.getGameEnded(board, 1)))
+            print("Game over: Turn ", str(it), "Result ", str(self.game.getGameEnded(board, 1)[0]))
             self.display(board)
         captured_sum = board._num_captured_stones[1]+board._num_captured_stones[-1]
-        return curPlayer * self.game.getGameEnded(board, curPlayer), it, captured_sum
+        score_diff = self.game.getGameEnded(board, curPlayer)[1]
+        return curPlayer * self.game.getGameEnded(board, curPlayer)[0], it, captured_sum, score_diff
 
     def playGames(self, num, verbose=False):
         """
@@ -85,8 +85,9 @@ class Arena():
         go_stage2 = False
         sum_iters = 0
         sum_captures = 0
+        sum_score_diff_squared = 0
         for _ in tqdm(range(num), desc="Arena.playGames (1)"):
-            gameResult, it, captures = self.playGame(verbose=verbose)
+            gameResult, it, captures, score_diff = self.playGame(verbose=verbose)
             if gameResult == 1:
                 oneWon += 1
                 oneWonOnBlack +=1
@@ -96,11 +97,12 @@ class Arena():
                 draws += 1
             sum_iters += it
             sum_captures += captures
+            sum_score_diff_squared += score_diff**2
 
         self.player1, self.player2 = self.player2, self.player1
 
         for _ in tqdm(range(num), desc="Arena.playGames (2)"):
-            gameResult, it, captures = self.playGame(verbose=verbose)
+            gameResult, it, captures, score_diff = self.playGame(verbose=verbose)
             if gameResult == -1:
                 oneWon += 1
             elif gameResult == 1:
@@ -109,12 +111,16 @@ class Arena():
                 draws += 1
             sum_iters += it
             sum_captures += captures
+            sum_score_diff_squared += score_diff**2
 
         avg_iters = sum_iters/(num*2)
         avg_captures = sum_captures/(num*2)
         if (avg_iters > self.game.getBoardSize()[0]**2 - self.game.getBoardSize()[0]) and (avg_captures < self.game.getBoardSize()[1]**2):
             go_stage2 = True
             if (oneWon > 2*twoWon) or (twoWon > 2*oneWon):
+                go_stage2 = False
+            sd = math.sqrt((sum_score_diff_squared/(num*2)))
+            if 0.5*sd < 6: #if normal disribution, more than 38% of game win within 6 scores should stay stage 1
                 go_stage2 = False
 
         return oneWon, twoWon, draws, oneWonOnBlack, go_stage2
