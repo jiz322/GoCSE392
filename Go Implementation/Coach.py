@@ -30,7 +30,7 @@ class Coach():
         self.trainExamplesHistory = []  # history of examples from args.numItersForTrainExamplesHistory latest iterations
         self.skipFirstSelfPlay = False  # can be overriden in loadTrainExamples()
 
-    def executeEpisode(self):
+    def executeEpisode(self, stage1=False):
         """
         This function executes one episode of self-play, starting with player 1.
         As the game is played, each turn is added as a training example to
@@ -56,7 +56,7 @@ class Coach():
             canonicalBoard = self.game.getCanonicalForm(board, self.curPlayer)
             temp = int(episodeStep < self.args.tempThreshold)
             #fastDecision data should not be collected (ketaGo Paper)
-            pi, fastDecision = self.mcts.getActionProb(canonicalBoard, temp=temp, training=1)
+            pi, fastDecision = self.mcts.getActionProb(canonicalBoard, temp=1, training=1, stage1=stage1)
             sym = self.game.getSymmetries(canonicalBoard, pi)
             for b, p in sym:
                 if not fastDecision:  #only add example of slow decisions
@@ -68,9 +68,10 @@ class Coach():
             r = self.game.getGameEnded(board, self.curPlayer)
 
             if r != 0:
+                print(board)
                 return [(x[0], x[2], r * ((-1) ** (x[1] != self.curPlayer))) for x in trainExamples]
-
-    def learn(self):
+    # In stage1, it may jump out of iterations as reaching certain threshold at Arena.
+    def learn(self, stage1 = False):
         """
         Performs numIters iterations with numEps episodes of self-play in each
         iteration. After every iteration, it retrains neural network with
@@ -88,7 +89,7 @@ class Coach():
 
                 for _ in tqdm(range(self.args.numEps), desc="Self Play"):
                     self.mcts = MCTS(self.game, self.nnet, self.args)  # reset search tree
-                    iterationTrainExamples += self.executeEpisode()
+                    iterationTrainExamples += self.executeEpisode(stage1=stage1)
 
                 # save the iteration examples to the history 
                 self.trainExamplesHistory.append(iterationTrainExamples)
@@ -115,8 +116,9 @@ class Coach():
                 log.info('PITTING AGAINST PREVIOUS VERSION')
                 arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=1, arena=1)[0]),
                             lambda x: np.argmax(nmcts.getActionProb(x, temp=1, arena=1)[0]), self.game)
-                pwins, nwins, draws, pwins_black = arena.playGames(self.args.arenaCompare)
+                pwins, nwins, draws, pwins_black, go_stage2 = arena.playGames(self.args.arenaCompare)
                 log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d ; PREV_WinOnBlack : %d' % (nwins, pwins, draws, pwins_black))
+
                 if pwins + nwins == 0 or float(nwins) / (pwins + nwins) < self.args.updateThreshold:
                     log.info('REJECTING NEW MODEL')
                     #load the current best after reject
@@ -128,11 +130,14 @@ class Coach():
                     self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
                     self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
                     self.saveTrainExamples(0, saveBest=True) #save as best.pth.tar.example
+                if stage1 and go_stage2:
+                    return True # go stage2
             else:
                 self.firstIter = False
                 log.info('ACCEPTING NEW MODEL')
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
+        return False #Stage1 not completed
 
     def getCheckpointFile(self, iteration):
         return 'checkpoint_' + str(iteration) + '.pth.tar'

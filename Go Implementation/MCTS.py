@@ -26,7 +26,7 @@ class MCTS():
         self.Vs = {}  # stores game.getValidMoves for board s
 
     # Noise only add to training mode (not for Arena Nor pit)
-    def getActionProb(self, canonicalBoard, temp=1, training=0, arena=0):
+    def getActionProb(self, canonicalBoard, temp=1, training=0, arena=0, stage1=False):
         """
         This function performs numMCTSSims simulations of MCTS starting from
         canonicalBoard.
@@ -44,9 +44,14 @@ class MCTS():
         # 25% of all do as many as numMCTSS searches, 75% do a quick search
         # Quick search add no noise
         # Only slow searches are recorded, so return isFast and pass it to Coach
-        fastDecision = int(0.2*self.args.numMCTSSims)                                          
+        fastDecision = int(0.2*self.args.numMCTSSims)
+        if fastDecision == 0:
+            fastDecision = 1         # at least simulate once                               
         noised_numMCTSSims = np.random.choice([self.args.numMCTSSims, fastDecision], p=[0.25, 0.75])
         isFast = (noised_numMCTSSims == fastDecision)
+        if stage1:
+            noised_numMCTSSims = self.args.numMCTSSims
+            isFast = False
         if training == 1: # in self-iteration
             for i in range(noised_numMCTSSims):
                 self.search(canonicalBoard, noise=not isFast) # Dirichlet noise only in slow decision

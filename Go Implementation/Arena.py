@@ -63,7 +63,8 @@ class Arena():
             assert self.display
             print("Game over: Turn ", str(it), "Result ", str(self.game.getGameEnded(board, 1)))
             self.display(board)
-        return curPlayer * self.game.getGameEnded(board, curPlayer)
+        captured_sum = board._num_captured_stones[1]+board._num_captured_stones[-1]
+        return curPlayer * self.game.getGameEnded(board, curPlayer), it, captured_sum
 
     def playGames(self, num, verbose=False):
         """
@@ -81,8 +82,11 @@ class Arena():
         oneWonOnBlack = 0
         twoWon = 0
         draws = 0
+        go_stage2 = False
+        sum_iters = 0
+        sum_captures = 0
         for _ in tqdm(range(num), desc="Arena.playGames (1)"):
-            gameResult = self.playGame(verbose=verbose)
+            gameResult, it, captures = self.playGame(verbose=verbose)
             if gameResult == 1:
                 oneWon += 1
                 oneWonOnBlack +=1
@@ -90,16 +94,25 @@ class Arena():
                 twoWon += 1
             else:
                 draws += 1
+            sum_iters += it
+            sum_captures += captures
 
         self.player1, self.player2 = self.player2, self.player1
 
         for _ in tqdm(range(num), desc="Arena.playGames (2)"):
-            gameResult = self.playGame(verbose=verbose)
+            gameResult, it, captures = self.playGame(verbose=verbose)
             if gameResult == -1:
                 oneWon += 1
             elif gameResult == 1:
                 twoWon += 1
             else:
                 draws += 1
+            sum_iters += it
+            sum_captures += captures
 
-        return oneWon, twoWon, draws, oneWonOnBlack
+        avg_iters = sum_iters/(num*2)
+        avg_captures = sum_captures/(num*2)
+        if (avg_iters > self.game.getBoardSize()[0]**2 - self.game.getBoardSize()[0]) and (avg_captures < self.game.getBoardSize()[1]**2):
+            go_stage2 = True
+
+        return oneWon, twoWon, draws, oneWonOnBlack, go_stage2
