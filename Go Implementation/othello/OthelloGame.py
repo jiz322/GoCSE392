@@ -161,7 +161,7 @@ class OthelloGame(Game):
             #print(board)
             diff = self.goGame.game.get_scores().get(player) - self.goGame.game.get_scores().get(-player)
             #print(self.goGame.game.board)
-            if not balanced:
+            if not self.balanced:
                 if diff > 0:
                     return 1
                 else:
