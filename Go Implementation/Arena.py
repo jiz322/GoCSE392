@@ -114,5 +114,7 @@ class Arena():
         avg_captures = sum_captures/(num*2)
         if (avg_iters > self.game.getBoardSize()[0]**2 - self.game.getBoardSize()[0]) and (avg_captures < self.game.getBoardSize()[1]**2):
             go_stage2 = True
+            if (oneWon > 2*twoWon) or (twoWon > 2*oneWon):
+                go_stage2 = False
 
         return oneWon, twoWon, draws, oneWonOnBlack, go_stage2
