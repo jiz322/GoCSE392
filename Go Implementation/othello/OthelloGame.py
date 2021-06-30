@@ -24,9 +24,10 @@ class OthelloGame(Game):
     def getSquarePiece(piece):
         return OthelloGame.square_content[piece]
 
-    def __init__(self, n):
+    def __init__(self, n, balanced = True):
         self.n = n
         self.goGame = None
+        self.balanced = balanced
 
     def getInitBoard(self):
         # return initial board (numpy board)
@@ -160,6 +161,11 @@ class OthelloGame(Game):
             #print(board)
             diff = self.goGame.game.get_scores().get(player) - self.goGame.game.get_scores().get(-player)
             #print(self.goGame.game.board)
+            if not balanced:
+                if diff > 0:
+                    return 1
+                else:
+                    return -1
             if board.turns%2 and diff > -6:
                 #print("current player win")
                 return 1
