@@ -71,7 +71,7 @@ class Coach():
                 ret = [(x[0], x[2], r * ((-1) ** (x[1] != self.curPlayer))) for x in trainExamples]
                 ret_sum = []
                 for i in range(d):
-                    if i < 10
+                    if i < 10:
                         ret_sum += ret
                 return ret_sum
     # In stage1, it may jump out of iterations as reaching certain threshold at Arena.
