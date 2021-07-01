@@ -90,6 +90,7 @@ class MCTS():
         else: #vary rare, but it may happen due to the 'ko'
             probs = [0 for x in counts]
             probs[-1] = 1
+        #print(counts)
 
 
         return probs, isFast
@@ -187,7 +188,7 @@ class MCTS():
             if valids[a]:
                 #print((a,valids[a]))
                 if (s, a) in self.Qsa:
-                    u = self.Qsa[(s, a)] + self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s]) / (
+                    u = self.Qsa[(s, a)] + self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s] - self.Nsa[(s, a)] + 1) / (
                             1 + self.Nsa[(s, a)])
                 else:
                     u = self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s] + EPS)  # Q = 0 ?
