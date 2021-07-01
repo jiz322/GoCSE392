@@ -70,9 +70,9 @@ class Coach():
             if r != 0: #also add an reward for large win 
                 ret = [(x[0], x[2], r * ((-1) ** (x[1] != self.curPlayer))) for x in trainExamples]
                 ret_sum = []
+                d = int(((d**2)/(board.board_size**2))*10/(board.board_size**2) + 1) # reward formula created by Jiageng
                 for i in range(d):
-                    if i < 10:
-                        ret_sum += ret
+                    ret_sum += ret
                 return ret_sum
     # In stage1, it may jump out of iterations as reaching certain threshold at Arena.
     def learn(self, stage1 = False):
