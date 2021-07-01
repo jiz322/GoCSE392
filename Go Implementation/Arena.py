@@ -115,12 +115,12 @@ class Arena():
 
         avg_iters = sum_iters/(num*2)
         avg_captures = sum_captures/(num*2)
+        sd = math.sqrt((sum_score_diff_squared/(num*2)))
         if (avg_iters > self.game.getBoardSize()[0]**2 - self.game.getBoardSize()[0]) and (avg_captures < self.game.getBoardSize()[1]**2):
             go_stage2 = True
             if (oneWon > 2*twoWon) or (twoWon > 2*oneWon):
-                go_stage2 = False
-            sd = math.sqrt((sum_score_diff_squared/(num*2)))
-            if 0.5*sd < 6: #if normal disribution, more than 38% of game win within 6 scores should stay stage 1
+                go_stage2 = False            
+            if 0.32*sd < 6: #if normal disribution, more than 25% of game win within 6 scores should stay stage 1
                 go_stage2 = False
         print('sd: ',sd)
         print('avg capture: ', avg_captures)
