@@ -125,8 +125,8 @@ class Arena():
         print('sd: ',sd)
         print('avg capture: ', avg_captures)
         print('avg_iters: ', avg_iters)
-        log.debug(f'sd: "{sd}"')
-        log.debug(f'avg capture: "{avg_captures}"')
-        log.debug(f'avg_iters: "{avg_iters}"')
+        log.info(f'sd: "{sd}"')
+        log.info(f'avg capture: "{avg_captures}"')
+        log.info(f'avg_iters: "{avg_iters}"')
 
         return oneWon, twoWon, draws, oneWonOnBlack, go_stage2
