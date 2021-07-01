@@ -120,7 +120,7 @@ class Arena():
             go_stage2 = True
             if (oneWon > 2*twoWon) or (twoWon > 2*oneWon):
                 go_stage2 = False            
-            if 0.40*sd < 6: #if normal disribution, more than 31% of game win within 6 scores should stay stage 1
+            if 0.50*sd < 6: #if normal disribution, more than 31% of game win within 6 scores should stay stage 1
                 go_stage2 = False
         print('sd: ',sd)
         print('avg capture: ', avg_captures)
