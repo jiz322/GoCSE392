@@ -122,5 +122,8 @@ class Arena():
             sd = math.sqrt((sum_score_diff_squared/(num*2)))
             if 0.5*sd < 6: #if normal disribution, more than 38% of game win within 6 scores should stay stage 1
                 go_stage2 = False
+        print('sd: ',sd)
+        print('avg capture: ', avg_captures)
+        print('avg_iters: ', avg_iters)
 
         return oneWon, twoWon, draws, oneWonOnBlack, go_stage2
