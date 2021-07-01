@@ -65,11 +65,15 @@ class Coach():
             action = np.random.choice(len(pi), p=pi)
             board, self.curPlayer = self.game.getNextState(board, self.curPlayer, action)
 
-            r = self.game.getGameEnded(board, self.curPlayer)[0]
+            r, d = self.game.getGameEnded(board, self.curPlayer)
 
-            if r != 0:
-                print(board)
-                return [(x[0], x[2], r * ((-1) ** (x[1] != self.curPlayer))) for x in trainExamples]
+            if r != 0: #also add an reward for large win 
+                ret = [(x[0], x[2], r * ((-1) ** (x[1] != self.curPlayer))) for x in trainExamples]
+                ret_sum = []
+                for i in range(d):
+                    if i < 10
+                        ret_sum += ret
+                return ret_sum
     # In stage1, it may jump out of iterations as reaching certain threshold at Arena.
     def learn(self, stage1 = False):
         """
