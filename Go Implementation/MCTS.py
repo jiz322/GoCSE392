@@ -35,8 +35,8 @@ class MCTS():
             probs: a policy vector where the probability of the ith action is
                    proportional to Nsa[(s,a)]**(1./temp)
         """
-        ##Reset the Tree here!!!!!!!
-        self.__init__(self.game, self.nnet, self.args) #to make the Arena work as expected instead of a large single tree.
+        ##Reset the Tree here!!!!!!! but do not initialize create better variety
+        #self.__init__(self.game, self.nnet, self.args) #to make the Arena work as expected instead of a large single tree.
         #comment: reset tree here make the Arena more fair, but it also loose somewhat acuracy
 
 
