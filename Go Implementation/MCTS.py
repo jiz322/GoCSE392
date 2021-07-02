@@ -36,7 +36,7 @@ class MCTS():
                    proportional to Nsa[(s,a)]**(1./temp)
         """
         ##Reset the Tree here!!!!!!!
-        self.__init__(self.game, self.nnet, self.args) #to make the Arena work as expected instead of a large single tree.
+        #self.__init__(self.game, self.nnet, self.args) #to make the Arena work as expected instead of a large single tree.
         #comment: reset tree here make the Arena more fair, but it also loose somewhat acuracy
 
 
