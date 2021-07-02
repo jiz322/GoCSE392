@@ -45,7 +45,7 @@ class MCTS():
         # Quick search add no noise
         # Only slow searches are recorded, so return isFast and pass it to Coach
         fastDecision = int(0.2*self.args.numMCTSSims)                                          
-        noised_numMCTSSims = np.random.choice([self.args.numMCTSSims, fastDecision], p=[0.25, 0.75])
+        noised_numMCTSSims = np.random.choice([self.args.numMCTSSims, fastDecision], p=[1, 0])
         isFast = (noised_numMCTSSims == fastDecision)
         if training == 1: # in self-iteration
             for i in range(noised_numMCTSSims):
