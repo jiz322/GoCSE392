@@ -40,6 +40,8 @@ class MCTS():
 
         s = self.game.stringRepresentation(canonicalBoard)
         counts = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in range(self.game.getActionSize())]
+        valids = self.game.getValidMoves(canonicalBoard, 1)
+        counts = counts * valids 
 
         if temp == 0:
             bestAs = np.array(np.argwhere(counts == np.max(counts))).flatten()
@@ -61,7 +63,8 @@ class MCTS():
         if counts_sum != 0:
             probs = [x / counts_sum for x in counts]
         else:
-            probs = [1 / len(counts) for x in counts]
+            probs = [0 for x in counts]
+            probs[-1] = 1
         return probs
 
     def search(self, canonicalBoard):
