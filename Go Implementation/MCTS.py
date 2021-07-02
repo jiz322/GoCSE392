@@ -48,7 +48,7 @@ class MCTS():
         fastDecision = int(0.2*self.args.numMCTSSims)
         if fastDecision == 0:
             fastDecision = 1         # at least simulate once                               
-        noised_numMCTSSims = np.random.choice([self.args.numMCTSSims, fastDecision], p=[0.25, 0.75])
+        noised_numMCTSSims = np.random.choice([self.args.numMCTSSims, fastDecision], p=[1, 0])
         isFast = (noised_numMCTSSims == fastDecision)
         if stage1:
             noised_numMCTSSims = self.args.numMCTSSims
