@@ -13,18 +13,18 @@ coloredlogs.install(level='INFO')  # Change this to DEBUG to see more info.
 
 args = dotdict({
     'numIters': 50,
-    'numEps': 6,              # Number of complete self-play games to simulate during a new iteration.
+    'numEps': 100,              # Number of complete self-play games to simulate during a new iteration.
     'tempThreshold': 1500,        # infite
-    'updateThreshold': 0.65,     # During arena playoff, new neural net will be accepted if threshold or more of games are won.
+    'updateThreshold': 0.60,     # During arena playoff, new neural net will be accepted if threshold or more of games are won.
     'maxlenOfQueue': 200000,    # Number of game examples to train the neural networks.
-    'numMCTSSims': 100,          # Number of games moves for MCTS to simulate.
-    'arenaCompare': 4,         # Number of games to play during arena play to determine if new net will be accepted.
+    'numMCTSSims': 52,          # Number of games moves for MCTS to simulate.
+    'arenaCompare': 8,         # Number of games to play during arena play to determine if new net will be accepted.
     'cpuct': 1.1,
-    'arenaNumMCTSSims': 60,
+    'arenaNumMCTSSims': 52,
     'firstIter': True,        #set true if it produce first chechpoint to save, for multuprocess, the following has to be FALSE
 
     'checkpoint': './temp/',
-    'load_model': True,
+    'load_model': False,
     'load_folder_file': ('./temp','best.pth.tar'),
     'numItersForTrainExamplesHistory': 50,
 
@@ -33,7 +33,7 @@ args = dotdict({
 
 def main():
     log.info('Loading %s...', Game.__name__)
-    g = Game(9)
+    g = Game(5)
 
     log.info('Loading %s...', nn.__name__)
     nnet = nn(g)
