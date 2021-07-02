@@ -62,10 +62,10 @@ def main():
             'tempThreshold': 1500,        # infite
             'updateThreshold': 0.6,     # During arena playoff, new neural net will be accepted if threshold or more of games are won.
             'maxlenOfQueue': 200000,    # Number of game examples to train the neural networks.
-            'numMCTSSims': 100,          # Number of games moves for MCTS to simulate.
+            'numMCTSSims': 52,          # Number of games moves for MCTS to simulate.
             'arenaCompare': 8,         # Number of games to play during arena play to determine if new net will be accepted.
             'cpuct': 1.1,
-            'arenaNumMCTSSims': 70,
+            'arenaNumMCTSSims': 52,
             'firstIter': False,        #set true if it produce first chechpoint to save, for multuprocess, the following has to be FALSE
 
             'checkpoint': './temp/',
