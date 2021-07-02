@@ -38,6 +38,7 @@ class MCTS():
         ##Reset the Tree here!!!!!!! but do not initialize create better variety
         #self.__init__(self.game, self.nnet, self.args) #to make the Arena work as expected instead of a large single tree.
         #comment: reset tree here make the Arena more fair, but it also loose somewhat acuracy
+        #comment: it reduce accuracy during self-play, NEVER init this here
 
 
         #Add noise Improve the quality of sample (see Keta-Go paper)  
