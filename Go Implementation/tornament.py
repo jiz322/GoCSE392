@@ -35,10 +35,11 @@ def createNetPlayer(tarName, sim=2, cpuct=1.1):
     return player
 
 def playGame(player1, str1, player2, str2):
-    arena = Arena.Arena(player1, player2, g, display=OthelloGame.display)
-    x, y, z, xb = arena.playGames(100, verbose=True)
+    arena = Arena.Arena(player1, player2, g)
+    x, y, z, xb = arena.playGames(100, verbose=False)
     print(str1, " win: ", x)
     print(str2, " win: ", y)
+    print(str1, " win black: ", xb)
     return x, y
 #playGame(best1, 'best', best2, 'best2')
 
@@ -83,7 +84,7 @@ cha_27 = createNetPlayer("cha_27.pth.tar")
 cha_52 = createNetPlayer("cha_52.pth.tar")
 cha_77 = createNetPlayer("cha_77.pth.tar")
 cha_102 = createNetPlayer("cha_102.pth.tar")
-playerList = [cha_102, def_102]
+playerList = [def_102, cha_102]
 result = tournament(playerList)
 print(result)
 
