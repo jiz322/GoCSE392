@@ -3,7 +3,7 @@ import math
 
 import numpy as np
 
-EPS = 1e-8
+EPS = 1#e-8
 
 log = logging.getLogger(__name__)
 

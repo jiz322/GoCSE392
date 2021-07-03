@@ -127,7 +127,7 @@ class Coach():
                     log.info('ACCEPTING NEW MODEL')
                     self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
                     self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
-                    self.saveTrainExamples(0, saveBest=True) #save as best.pth.tar.example
+                    #self.saveTrainExamples(0, saveBest=True) #save as best.pth.tar.example
             else:
                 self.firstIter = False
                 log.info('ACCEPTING NEW MODEL')
