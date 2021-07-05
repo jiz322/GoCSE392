@@ -15,8 +15,9 @@ use thisss script to play any two agents against each other, or play manually wi
 any agent.
 """
 
-human_vs_cpu = True
 
+playouts = 300
+instinctPlay = False
 
 g = OthelloGame(5)
 
@@ -31,12 +32,12 @@ def createNetPlayer(tarName, sim=2, cpuct=1.1):
     n.load_checkpoint('./temp/', tarName)
     args = dotdict({'numMCTSSims': sim, 'cpuct':cpuct})
     mcts = MCTS(g, n, args)
-    player = lambda x: np.argmax(mcts.getActionProb(x, temp=0)[0])
+    player = lambda x: np.argmax(mcts.getActionProb(x, temp=0, instinctPlay=instinctPlay)[0])
     return player
 
 def playGame(player1, str1, player2, str2):
     arena = Arena.Arena(player1, player2, g)
-    x, y, z, xb = arena.playGames(100, verbose=False)
+    x, y, z, xb = arena.playGames(playouts, verbose=False)
     print(str1, " win: ", x)
     print(str2, " win: ", y)
     print(str1, " win black: ", xb)
@@ -49,8 +50,8 @@ def tournament(playList):
         for b in playList:
             if a is not b:
                 aWin, bWin = playGame(a, 'p1', b, 'p2')           
-                tournamentResult[a] += (aWin - bWin + 100)
-                tournamentResult[b] += (bWin - aWin + 100)
+                tournamentResult[a] += (aWin - bWin + playouts)/2
+                tournamentResult[b] += (bWin - aWin + playouts)/2
     print (
     '''
     く__,.ヘヽ.　　　　/　,ー､ 〉
@@ -84,7 +85,12 @@ cha_27 = createNetPlayer("cha_27.pth.tar")
 cha_52 = createNetPlayer("cha_52.pth.tar")
 cha_77 = createNetPlayer("cha_77.pth.tar")
 cha_102 = createNetPlayer("cha_102.pth.tar")
-playerList = [def_102, cha_102]
+one = createNetPlayer("one.pth.tar")
+five = createNetPlayer("five.pth.tar")
+three = createNetPlayer("three.pth.tar")
+no_noise = createNetPlayer("no_noise.pth.tar")
+#playerList = [def_27, def_52, def_77, def_102, cha_27, cha_52, cha_77, cha_102, best]
+playerList = [best, five]
 result = tournament(playerList)
 print(result)
 

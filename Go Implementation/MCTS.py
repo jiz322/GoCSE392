@@ -3,7 +3,7 @@ import math
 
 import numpy as np
 
-EPS = 1#e-8
+EPS = 10000#e-8
 
 log = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ class MCTS():
         self.Vs = {}  # stores game.getValidMoves for board s
 
     # Noise only add to training mode (not for Arena Nor pit)
-    def getActionProb(self, canonicalBoard, temp=1, training=0, arena=0):
+    def getActionProb(self, canonicalBoard, temp=1, training=0, arena=0, instinctPlay=False, challenge=False):
         """
         This function performs numMCTSSims simulations of MCTS starting from
         canonicalBoard.
@@ -36,8 +36,10 @@ class MCTS():
                    proportional to Nsa[(s,a)]**(1./temp)
         """
         ##Reset the Tree here!!!!!!!
-        #self.__init__(self.game, self.nnet, self.args) #to make the Arena work as expected instead of a large single tree.
+        if instinctPlay:
+            self.__init__(self.game, self.nnet, self.args) #to make the Arena work as expected instead of a large single tree.
         #comment: reset tree here make the Arena more fair, but it also loose somewhat acuracy
+        #for test only
 
 
         #Add noise Improve the quality of sample (see Keta-Go paper)  
@@ -56,7 +58,7 @@ class MCTS():
         if training == 0 and arena == 0:
             #print(isFast)
             for i in range(self.args.numMCTSSims):
-                self.search(canonicalBoard, noise=False)
+                self.search(canonicalBoard, noise=False, challenge=challenge)
 
         s = self.game.stringRepresentation(canonicalBoard)
         counts = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in range(self.game.getActionSize())]
@@ -72,7 +74,8 @@ class MCTS():
             bestAs = np.array(np.argwhere(counts == np.max(counts))).flatten()
             bestA = np.random.choice(bestAs)
             probs = [0] * len(counts)
-            probs[bestA] = 1           
+            probs[bestA] = 1    
+            #print(self.Qsa[(s, bestA)])       
             return probs, isFast
         #print(counts)
         counts = [x ** (1. / temp) for x in counts]
@@ -87,10 +90,10 @@ class MCTS():
             probs[-1] = 1
 
 
-        return probs, isFast
+        return probs, isFast, self.Qsa[(s, bestA)]
 
     #For fastDecision, no further noise add to p
-    def search(self, canonicalBoard, noise=True):
+    def search(self, canonicalBoard, noise=True, challenge=False):
         """
         This function performs one iteration of MCTS. It is recursively called
         till a leaf node is found. The action chosen at each node is one that
@@ -182,8 +185,11 @@ class MCTS():
             if valids[a]:
                 #print((a,valids[a]))
                 if (s, a) in self.Qsa:
-                    u = self.Qsa[(s, a)] + self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s] - self.Nsa[(s, a)] + 1) / (
+                    u = self.Qsa[(s, a)] + self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s]) / (
                             1 + self.Nsa[(s, a)])
+                    if challenge:
+                        u = self.Qsa[(s, a)] + self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s] - self.Nsa[(s, a)] + 1) / (
+                                1 + self.Nsa[(s, a)])
                 else:
                     u = self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s] + EPS)  # Q = 0 ?
 
