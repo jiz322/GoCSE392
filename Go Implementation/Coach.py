@@ -21,7 +21,7 @@ class Coach():
     """
 
     def __init__(self, game, nnet, args):
-        self.firstIter = True
+        self.firstIter = args.firstIter #set true if it produce first chechpoint to save
         self.game = game
         self.nnet = nnet
         self.pnet = self.nnet.__class__(self.game)  # the competitor network
@@ -55,11 +55,12 @@ class Coach():
             episodeStep += 1
             canonicalBoard = self.game.getCanonicalForm(board, self.curPlayer)
             temp = int(episodeStep < self.args.tempThreshold)
-
-            pi = self.mcts.getActionProb(canonicalBoard, temp=temp)
+            #fastDecision data should not be collected (ketaGo Paper)
+            pi, fastDecision = self.mcts.getActionProb(canonicalBoard, temp=temp, training=1)
             sym = self.game.getSymmetries(canonicalBoard, pi)
             for b, p in sym:
-                trainExamples.append([b, self.curPlayer, p, None])
+                if not fastDecision:  #only add example of slow decisions
+                    trainExamples.append([b, self.curPlayer, p, None])
 
             action = np.random.choice(len(pi), p=pi)
             board, self.curPlayer = self.game.getNextState(board, self.curPlayer, action)
@@ -106,25 +107,28 @@ class Coach():
             for e in self.trainExamplesHistory:
                 trainExamples.extend(e)
             shuffle(trainExamples)
-             # training new network, keeping a copy of the old one
-            self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')       
+            self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')# training new network, keeping a copy of the old one              
             self.nnet.train(trainExamples)
             nmcts = MCTS(self.game, self.nnet, self.args)
             if not self.firstIter:
-                self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')   #have best at 2dn iteration
+                self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar') #Load the best after training to maximize efficenty
                 pmcts = MCTS(self.game, self.pnet, self.args)
                 log.info('PITTING AGAINST PREVIOUS VERSION')
-                arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=1)),
-                          lambda x: np.argmax(nmcts.getActionProb(x, temp=1)), self.game)
-                pwins, nwins, draws, pwins_black = arena.playGames(self.args.arenaCompare)            
+                arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=1, arena=1)[0]),
+                            lambda x: np.argmax(nmcts.getActionProb(x, temp=1, arena=1)[0]), self.game)
+                pwins, nwins, draws, pwins_black = arena.playGames(self.args.arenaCompare)
                 log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d ; PREV_WinOnBlack : %d' % (nwins, pwins, draws, pwins_black))
                 if pwins + nwins == 0 or float(nwins) / (pwins + nwins) < self.args.updateThreshold:
                     log.info('REJECTING NEW MODEL')
-                    self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar') # load best nn after reject, keep example
+                    #load the current best after reject
+                    self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
+                    #self.loadTrainExamples(loadBest=True) 
+                    # Keep the example the same!!!!!!!
                 else:
                     log.info('ACCEPTING NEW MODEL')
                     self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
                     self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
+
             else: #first iteratioin, just accept it so that we have best.pth.tar
                 log.info('ACCEPTING NEW MODEL')
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
@@ -134,23 +138,26 @@ class Coach():
     def getCheckpointFile(self, iteration):
         return 'checkpoint_' + str(iteration) + '.pth.tar'
 
-    def saveTrainExamples(self, iteration):
+    #add the way to save best example
+    def saveTrainExamples(self, iteration, saveBest=False):
         folder = self.args.checkpoint
         if not os.path.exists(folder):
             os.makedirs(folder)
         filename = os.path.join(folder, self.getCheckpointFile(iteration) + ".examples")
+        if saveBest:
+            filename = "best.pth.tar.examples"
         with open(filename, "wb+") as f:
             Pickler(f).dump(self.trainExamplesHistory)
         f.closed
 
-    def loadTrainExamples(self):
+    #add the way to load best example
+    def loadTrainExamples(self, loadBest=False):
         modelFile = os.path.join(self.args.load_folder_file[0], self.args.load_folder_file[1])
         examplesFile = modelFile + ".examples"
+        if loadBest:
+            examplesFile = "best.pth.tar.examples"
         if not os.path.isfile(examplesFile):
             log.warning(f'File "{examplesFile}" with trainExamples not found!')
-            r = input("Continue? [y|n]")
-            if r != "y":
-                sys.exit()
         else:
             log.info("File with trainExamples found. Loading it...")
             with open(examplesFile, "rb") as f:
@@ -158,4 +165,6 @@ class Coach():
             log.info('Loading done!')
 
             # examples based on the model were already collected (loaded)
-            self.skipFirstSelfPlay = True
+            # do not skip if it loads the best
+            if not loadBest:
+                self.skipFirstSelfPlay = True
