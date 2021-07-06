@@ -36,8 +36,8 @@ class MCTS():
                    proportional to Nsa[(s,a)]**(1./temp)
         """
         ##Reset the Tree here!!!!!!!
-        if instinctPlay:
-            self.__init__(self.game, self.nnet, self.args) #to make the Arena work as expected instead of a large single tree.
+        #if instinctPlay:
+         #   self.__init__(self.game, self.nnet, self.args) #to make the Arena work as expected instead of a large single tree.
         #comment: reset tree here make the Arena more fair, but it also loose somewhat acuracy
         #for test only
 
@@ -90,7 +90,7 @@ class MCTS():
             probs[-1] = 1
 
 
-        return probs, isFast, self.Qsa[(s, bestA)]
+        return probs, isFast
 
     #For fastDecision, no further noise add to p
     def search(self, canonicalBoard, noise=True, challenge=False):
