@@ -25,6 +25,7 @@ class MCTS():
         self.Es = {}  # stores game.getGameEnded ended for board s
         self.Vs = {}  # stores game.getValidMoves for board s
 
+
     # Noise only add to training mode (not for Arena Nor pit)
     def getActionProb(self, canonicalBoard, temp=1, training=0, arena=0, instinctPlay=False, challenge=False):
         """
@@ -187,6 +188,7 @@ class MCTS():
                 if (s, a) in self.Qsa:
                     u = self.Qsa[(s, a)] + self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s]) / (
                             1 + self.Nsa[(s, a)])
+
                     if challenge:
                         u = self.Qsa[(s, a)] + self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s] - self.Nsa[(s, a)] + 1) / (
                                 1 + self.Nsa[(s, a)])
