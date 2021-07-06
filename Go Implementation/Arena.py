@@ -43,6 +43,8 @@ class Arena():
         it = 0
         while self.game.getGameEnded(board, curPlayer) == 0:
             it += 1
+            #if it == 4:
+           #     players = [self.player1, None, self.player2] exchange at 4th move
             if verbose:
                 assert self.display
                 print("Turn ", str(it), "Player ", str(curPlayer))

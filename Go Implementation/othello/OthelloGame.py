@@ -54,6 +54,7 @@ class OthelloGame(Game):
             if board.previous_is_pass == True: 
                 board.pre_previous_is_pass = True
             board.previous_is_pass = True
+            board.turns += 1
             return (board, -player)
 
         move = (int(action/self.n), action%self.n) #Interpret the Action

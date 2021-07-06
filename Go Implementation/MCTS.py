@@ -3,7 +3,7 @@ import math
 
 import numpy as np
 
-EPS = 1e-8
+EPS = 10000#e-8
 
 log = logging.getLogger(__name__)
 
@@ -25,7 +25,9 @@ class MCTS():
         self.Es = {}  # stores game.getGameEnded ended for board s
         self.Vs = {}  # stores game.getValidMoves for board s
 
-    def getActionProb(self, canonicalBoard, temp=1, challenge=False):
+
+    # Noise only add to training mode (not for Arena Nor pit)
+    def getActionProb(self, canonicalBoard, temp=1, training=0, arena=0, instinctPlay=False, challenge=False):
         """
         This function performs numMCTSSims simulations of MCTS starting from
         canonicalBoard.
@@ -34,12 +36,38 @@ class MCTS():
             probs: a policy vector where the probability of the ith action is
                    proportional to Nsa[(s,a)]**(1./temp)
         """
-        
-        for i in range(self.args.numMCTSSims):
-            self.search(canonicalBoard, challenge)
+        ##Reset the Tree here!!!!!!!
+        #if instinctPlay:
+         #   self.__init__(self.game, self.nnet, self.args) #to make the Arena work as expected instead of a large single tree.
+        #comment: reset tree here make the Arena more fair, but it also loose somewhat acuracy
+        #for test only
+
+
+        #Add noise Improve the quality of sample (see Keta-Go paper)  
+        # 25% of all do as many as numMCTSS searches, 75% do a quick search
+        # Quick search add no noise
+        # Only slow searches are recorded, so return isFast and pass it to Coach
+        fastDecision = int(0.2*self.args.numMCTSSims)                                          
+        noised_numMCTSSims = np.random.choice([self.args.numMCTSSims, fastDecision], p=[1, 0])
+        isFast = (noised_numMCTSSims == fastDecision)
+        if training == 1: # in self-iteration
+            for i in range(noised_numMCTSSims):
+                self.search(canonicalBoard, noise=not isFast) # Dirichlet noise only in slow decision
+        if arena == 1: # in arena
+            for i in range(self.args.arenaNumMCTSSims):
+                self.search(canonicalBoard, noise=False)
+        if training == 0 and arena == 0:
+            #print(isFast)
+            for i in range(self.args.numMCTSSims):
+                self.search(canonicalBoard, noise=False, challenge=challenge)
 
         s = self.game.stringRepresentation(canonicalBoard)
         counts = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in range(self.game.getActionSize())]
+        #print(counts)
+        #print([self.Qsa[(s, a)] if (s, a) in self.Qsa else 0 for a in range(self.game.getActionSize())])
+
+        # For go, the highest NSA may not a legal move due to the rule of 'ko' 
+        # Then, we mask it 0.
         valids = self.game.getValidMoves(canonicalBoard, 1)
         counts = counts * valids 
 
@@ -47,27 +75,26 @@ class MCTS():
             bestAs = np.array(np.argwhere(counts == np.max(counts))).flatten()
             bestA = np.random.choice(bestAs)
             probs = [0] * len(counts)
-            probs[bestA] = 1
-            return probs
+            probs[bestA] = 1    
+            #print(self.Qsa[(s, bestA)])       
+            return probs, isFast
         #print(counts)
         counts = [x ** (1. / temp) for x in counts]
         #print(counts)
         counts_sum = float(sum(counts))
 
 
-        ##############
-        #To AVOID DIVIDBYZERO, ADD THE FOLLOWING LOGIC
-        ##########
-
-
         if counts_sum != 0:
             probs = [x / counts_sum for x in counts]
-        else:
+        else: #vary rare, but it may happen due to the 'ko'
             probs = [0 for x in counts]
             probs[-1] = 1
-        return probs
 
-    def search(self, canonicalBoard, challenge=False):
+
+        return probs, isFast
+
+    #For fastDecision, no further noise add to p
+    def search(self, canonicalBoard, noise=True, challenge=False):
         """
         This function performs one iteration of MCTS. It is recursively called
         till a leaf node is found. The action chosen at each node is one that
@@ -113,11 +140,18 @@ class MCTS():
             #print(canonicalBoard)
             # leaf node
             self.Ps[s], v = self.nnet.predict(canonicalBoard)
+
             #print('nn')
             #print(canonicalBoard)
             valids = self.game.getValidMoves(canonicalBoard, 1)
-            #print('valid')
-            #print(canonicalBoard)  
+            valid_length = len(self.Ps[s]) - np.count_nonzero(self.Ps[s]==0)
+            if noise: # add dirichlet noise to the root policy
+                #print("here")
+                #print(self.Ps[s])
+                #print(self.Ps[s][0])
+                self.Ps[s] = 0.75*self.Ps[s] + 0.25*np.random.dirichlet([0.03*canonicalBoard.board_size**2/valid_length]*len(self.Ps[s]))
+                #print(newPs)
+                #print(0.25*np.random.dirichlet([0.03*canonicalBoard.board_size**2/valid_length]*len(self.Ps[s])))
             self.Ps[s] = self.Ps[s] * valids  # masking invalid moves
             sum_Ps_s = np.sum(self.Ps[s])
             
@@ -138,6 +172,7 @@ class MCTS():
 
             self.Vs[s] = valids
             self.Ns[s] = 0
+            #print(canonicalBoard)
             return -v
 
         valids = self.Vs[s]
@@ -153,8 +188,10 @@ class MCTS():
                 if (s, a) in self.Qsa:
                     u = self.Qsa[(s, a)] + self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s]) / (
                             1 + self.Nsa[(s, a)])
-                    if challenge is True:
-                        u = self.Qsa[(s, a)] + self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s]-self.Nsa[(s,a)] + 1) / (1 + self.Nsa[(s, a)])
+
+                    if challenge:
+                        u = self.Qsa[(s, a)] + self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s] - self.Nsa[(s, a)] + 1) / (
+                                1 + self.Nsa[(s, a)])
                 else:
                     u = self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s] + EPS)  # Q = 0 ?
 
@@ -169,7 +206,7 @@ class MCTS():
         next_s = self.game.getCanonicalForm(next_s, next_player)
         #print("CanonicalForm")
         #print(next_s)
-        v = self.search(next_s)
+        v = self.search(next_s, noise=False) #keta Paper: dirichlet noise only add to root
 
         if (s, a) in self.Qsa:
             self.Qsa[(s, a)] = (self.Nsa[(s, a)] * self.Qsa[(s, a)] + v) / (self.Nsa[(s, a)] + 1)
