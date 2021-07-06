@@ -65,12 +65,10 @@ class MCTS():
         counts = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in range(self.game.getActionSize())]
         #print(counts)
         #print([self.Qsa[(s, a)] if (s, a) in self.Qsa else 0 for a in range(self.game.getActionSize())])
-
         # For go, the highest NSA may not a legal move due to the rule of 'ko' 
         # Then, we mask it 0.
         valids = self.game.getValidMoves(canonicalBoard, 1)
         counts = counts * valids 
-
         if temp == 0:
             bestAs = np.array(np.argwhere(counts == np.max(counts))).flatten()
             bestA = np.random.choice(bestAs)
@@ -86,9 +84,11 @@ class MCTS():
 
         if counts_sum != 0:
             probs = [x / counts_sum for x in counts]
+
         else: #vary rare, but it may happen due to the 'ko'
             probs = [0 for x in counts]
             probs[-1] = 1
+
 
 
         return probs, isFast
@@ -186,7 +186,7 @@ class MCTS():
             if valids[a]:
                 #print((a,valids[a]))
                 if (s, a) in self.Qsa:
-                    u = self.Qsa[(s, a)] + self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s]) / (
+                    u = self.Qsa[(s, a)] + self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s] - self.Nsa[(s, a)] + 1) / (
                             1 + self.Nsa[(s, a)])
 
                     if challenge:

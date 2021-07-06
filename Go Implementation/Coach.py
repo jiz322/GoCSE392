@@ -77,6 +77,10 @@ class Coach():
         examples in trainExamples (which has a maximum length of maxlenofQueue).
         It then pits the new neural network against the old one and accepts it
         only if it wins >= updateThreshold fraction of games.
+
+        Go edit:
+        load best.pth.tar to compare and self-iteration
+        temp.pth.tar only for training. it may be overwrite shortly
         """
 
         for i in range(1, self.args.numIters + 1):
@@ -85,14 +89,11 @@ class Coach():
             # examples of the iteration
             if not self.skipFirstSelfPlay or i > 1:
                 iterationTrainExamples = deque([], maxlen=self.args.maxlenOfQueue)
-
                 for _ in tqdm(range(self.args.numEps), desc="Self Play"):
                     self.mcts = MCTS(self.game, self.nnet, self.args)  # reset search tree
                     iterationTrainExamples += self.executeEpisode()
-
                 # save the iteration examples to the history 
                 self.trainExamplesHistory.append(iterationTrainExamples)
-
             if len(self.trainExamplesHistory) > self.args.numItersForTrainExamplesHistory:
                 log.warning(
                     f"Removing the oldest entry in trainExamples. len(trainExamplesHistory) = {len(self.trainExamplesHistory)}")
@@ -127,12 +128,12 @@ class Coach():
                     log.info('ACCEPTING NEW MODEL')
                     self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
                     self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
-                    #self.saveTrainExamples(0, saveBest=True) #save as best.pth.tar.example
-            else:
-                self.firstIter = False
+
+            else: #first iteratioin, just accept it so that we have best.pth.tar
                 log.info('ACCEPTING NEW MODEL')
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
+                self.firstIter = False
 
     def getCheckpointFile(self, iteration):
         return 'checkpoint_' + str(iteration) + '.pth.tar'
