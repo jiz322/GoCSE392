@@ -92,10 +92,7 @@ class Arena():
                 twoWon += 1
             else:
                 draws += 1
-
-        self.player1, self.player2 = self.player2, self.player1
-
-        for _ in tqdm(range(num), desc="Arena.playGames (2)"):
+            self.player1, self.player2 = self.player2, self.player1
             gameResult = self.playGame(verbose=verbose)
             if gameResult == -1:
                 oneWon += 1
@@ -103,5 +100,6 @@ class Arena():
                 twoWon += 1
             else:
                 draws += 1
+            self.player1, self.player2 = self.player2, self.player1
 
         return oneWon, twoWon, draws, oneWonOnBlack

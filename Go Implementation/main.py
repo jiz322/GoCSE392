@@ -1,4 +1,3 @@
-#NOTICE: MultiProcess NOT supported in the branch
 import logging
 
 import coloredlogs
@@ -13,6 +12,7 @@ log = logging.getLogger(__name__)
 coloredlogs.install(level='INFO')  # Change this to DEBUG to see more info.
 
 args = dotdict({
+    'size': 9,                  #board size
     'numIters': 200,
     'numEps': 50,              # Number of complete self-play games to simulate during a new iteration.
     'tempThreshold': 25,        # infite
@@ -21,9 +21,10 @@ args = dotdict({
     'numMCTSSims': 2,          # Number of games moves for MCTS to simulate.
     'arenaCompare': 100,         # Number of games to play during arena play to determine if new net will be accepted.
     'cpuct': 1.1,
-    'arenaNumMCTSSims': 2,
-    'firstIter': True,        #set true if it produce first chechpoint to save, for multuprocess, the following has to be FALSE
-
+    'arenaNumMCTSSims': 2,      #simulation for arena
+    'instinctArena': False,     #if set true reset Arena's MTCL tree each time
+    'balancedGame': False,      # if balanced, black should win over 6 scores
+    'firstIter': True,        #set true if it produce first chechpoint to save, for multuprocess, the followings has to be FALSE
     'checkpoint': './temp/',
     'load_model': False,
     'load_folder_file': ('./temp','77.pth.tar'),
@@ -34,7 +35,7 @@ args = dotdict({
 
 def main():
     log.info('Loading %s...', Game.__name__)
-    g = Game(9)
+    g = Game(args)
 
     log.info('Loading %s...', nn.__name__)
     nnet = nn(g)

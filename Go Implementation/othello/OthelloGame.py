@@ -24,8 +24,9 @@ class OthelloGame(Game):
     def getSquarePiece(piece):
         return OthelloGame.square_content[piece]
 
-    def __init__(self, n):
-        self.n = n
+    def __init__(self, args):
+        self.n = args.size
+        self.args = args
         self.goGame = None
 
     def getInitBoard(self):
@@ -155,22 +156,32 @@ class OthelloGame(Game):
         #print(self.goGame.game.board.previous_is_pass)
         #print(self.goGame.game.board.pre_previous_is_pass)
         #print('self.goGame.game.board.pre_previous_is_pass')
-        if ((self.goGame.game.board.previous_is_pass and self.goGame.game.board.pre_previous_is_pass) or board.turns > self.n*self.n*3/2):
-            #print('enddd')
-            #print(board)
-            diff = self.goGame.game.get_scores().get(player) - self.goGame.game.get_scores().get(-player)
-            #print(self.goGame.game.board)
-            if board.turns%2 and diff > -6:
-                #print("current player win")
-                return 1
-            elif diff > 6 and not board.turns%2:
-                return 1
+        if self.args.balancedGame is True:
+            if ((self.goGame.game.board.previous_is_pass and self.goGame.game.board.pre_previous_is_pass) or board.turns > self.n*self.n*3/2):
+                #print('enddd')
+                #print(board)
+                diff = self.goGame.game.get_scores().get(player) - self.goGame.game.get_scores().get(-player)
+                #print(self.goGame.game.board)
+                if board.turns%2 and diff > -6:
+                    #print("current player win")
+                    return 1
+                elif diff > 6 and not board.turns%2:
+                    return 1
+                else:
+                    #print("oppo player win")
+                    return -1
             else:
-                #print("oppo player win")
-                return -1
+            #  print('not end')
+                return 0
         else:
-          #  print('not end')
-            return 0
+            if ((self.goGame.game.board.previous_is_pass and self.goGame.game.board.pre_previous_is_pass) or board.turns > self.n*self.n*3/2):
+                diff = self.goGame.game.get_scores().get(player) - self.goGame.game.get_scores().get(-player)
+                if diff > 0:
+                    return 1
+                else:
+                    return -1
+            else:
+                return 0
 
 
     def getCanonicalForm(self, board, player):

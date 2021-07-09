@@ -12,11 +12,20 @@ from utils import *
 use thisss script to play any two agents against each other, or play manually with
 any agent.
 """
+args = dotdict({
+    'size': 5,                  #board size
+    'numMCTSSims': 10,          # Number of games moves for MCTS to simulate.
+    'arenaCompare': 10,         # Number of games to play during arena play to determine if new net will be accepted.
+    'cpuct': 1.1,
+    'arenaNumMCTSSims': 2,      # simulations for arena
+    'instinctArena': True,      # if set true reset Arena's MTCL tree each time
+    'balancedGame': False,      # if balanced, black should win over 6 scores
 
+})
 human_vs_cpu = True
 
 
-g = OthelloGame(5)
+g = OthelloGame(args)
 
 # all players
 rp = RandomPlayer(g).play
@@ -27,10 +36,9 @@ hp = HumanOthelloPlayer(g).play
 
 # nnet players
 n1 = NNet(g)
-n1.load_checkpoint('./temp/','best.pth.tar')
-args1 = dotdict({'numMCTSSims': 350, 'cpuct':1.1})
-mcts1 = MCTS(g, n1, args1)
-n1p = lambda x: np.argmax(mcts1.getActionProb(x, temp=0)[0])
+n1.load_checkpoint('./temp/','five.pth.tar')
+mcts1 = MCTS(g, n1, args)
+n1p = lambda x: np.argmax(mcts1.getActionProb(x, temp=0,instinctPlay=args.instinctArena)[0])
 
 
 player2 = hp

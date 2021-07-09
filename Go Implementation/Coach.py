@@ -114,8 +114,8 @@ class Coach():
                 self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar') #Load the best after training to maximize efficenty
                 pmcts = MCTS(self.game, self.pnet, self.args)
                 log.info('PITTING AGAINST PREVIOUS VERSION')
-                arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=1, arena=1)[0]),
-                            lambda x: np.argmax(nmcts.getActionProb(x, temp=1, arena=1)[0]), self.game)
+                arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=1, arena=1, instinctPlay=self.args.instinctArena)[0]),
+                            lambda x: np.argmax(nmcts.getActionProb(x, temp=1, arena=1, instinctPlay=self.args.instinctArena)[0]), self.game)
                 pwins, nwins, draws, pwins_black = arena.playGames(self.args.arenaCompare)
                 log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d ; PREV_WinOnBlack : %d' % (nwins, pwins, draws, pwins_black))
                 if pwins + nwins == 0 or float(nwins) / (pwins + nwins) < self.args.updateThreshold:

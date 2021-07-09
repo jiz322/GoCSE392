@@ -37,8 +37,8 @@ class MCTS():
                    proportional to Nsa[(s,a)]**(1./temp)
         """
         ##Reset the Tree here!!!!!!!
-        #if instinctPlay:
-         #   self.__init__(self.game, self.nnet, self.args) #to make the Arena work as expected instead of a large single tree.
+        if instinctPlay:
+            self.__init__(self.game, self.nnet, self.args) #to make the Arena work as expected instead of a large single tree.
         #comment: reset tree here make the Arena more fair, but it also loose somewhat acuracy
         #for test only
 
