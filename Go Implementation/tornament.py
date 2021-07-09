@@ -3,8 +3,6 @@ from MCTS import MCTS
 from othello.OthelloGame import OthelloGame
 from othello.OthelloPlayers import *
 from othello.pytorch.NNet import NNetWrapper as NNet
-
-from varname import nameof
 import numpy as np
 import random
 import operator
