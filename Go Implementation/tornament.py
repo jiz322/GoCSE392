@@ -35,9 +35,9 @@ rp = RandomPlayer(g).play
 hp = HumanOthelloPlayer(g).play
 
 
-def createNetPlayer(tarName, sim=args.numMCTSSims, cpuct=args.cpuct):
+def createNetPlayer(dirr, tarName, sim=args.numMCTSSims, cpuct=args.cpuct):
     n = NNet(g)
-    n.load_checkpoint('./temp/', tarName)
+    n.load_checkpoint(dirr, tarName)
     mcts = MCTS(g, n, args)
     player = lambda x: np.argmax(mcts.getActionProb(x, temp=0, instinctPlay=args.instinctArena)[0])
     return player
@@ -82,19 +82,19 @@ def tournament(playList):
     
 
     return list(tournamentResult.values())
-best = createNetPlayer("best.pth.tar")
-def_27 = createNetPlayer("def_27.pth.tar")
-def_52 = createNetPlayer("def_52.pth.tar")
-def_77 = createNetPlayer("def_77.pth.tar")
-def_102 = createNetPlayer("def_102.pth.tar")
-cha_27 = createNetPlayer("cha_27.pth.tar")
-cha_52 = createNetPlayer("cha_52.pth.tar")
-cha_77 = createNetPlayer("cha_77.pth.tar")
-cha_102 = createNetPlayer("cha_102.pth.tar")
-one = createNetPlayer("one.pth.tar")
-five = createNetPlayer("five.pth.tar")
-three = createNetPlayer("three.pth.tar")
-no_noise = createNetPlayer("no_noise.pth.tar")
+best = createNetPlayer('./temp/',"best.pth.tar")
+def_27 = createNetPlayer('./temp/',"def_27.pth.tar")
+def_52 = createNetPlayer('./temp/',"def_52.pth.tar")
+def_77 = createNetPlayer('./temp/',"def_77.pth.tar")
+def_102 = createNetPlayer('./temp/',"def_102.pth.tar")
+cha_27 = createNetPlayer('./temp/',"cha_27.pth.tar")
+cha_52 = createNetPlayer('./temp/',"cha_52.pth.tar")
+cha_77 = createNetPlayer('./temp/',"cha_77.pth.tar")
+cha_102 = createNetPlayer('./temp/',"cha_102.pth.tar")
+one = createNetPlayer('./temp/',"one.pth.tar")
+five = createNetPlayer('./temp/',"five.pth.tar")
+three = createNetPlayer('./temp/',"three.pth.tar")
+no_noise = createNetPlayer('./temp/',"no_noise.pth.tar")
 playerList = [def_27, def_52, def_77, def_102, cha_27, cha_52, cha_77, cha_102, best]
 #playerList = [best, five, cha_27, cha_52]
 result = tournament(playerList)
