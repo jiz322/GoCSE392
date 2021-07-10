@@ -60,6 +60,7 @@ class Arena():
                 print("valids", valids)
                 print("action", action)
                 action = self.game.n*self.game.n #if action not valid, then pass
+                                                #This change is no use anymore, the modification that efficatious is is MCLT.py
             board, curPlayer = self.game.getNextState(board, curPlayer, action)
         if verbose:
             assert self.display
