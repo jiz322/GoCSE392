@@ -3,7 +3,7 @@ import math
 
 import numpy as np
 
-EPS = 10000#e-8
+EPS = 1
 
 log = logging.getLogger(__name__)
 
@@ -36,13 +36,12 @@ class MCTS():
             probs: a policy vector where the probability of the ith action is
                    proportional to Nsa[(s,a)]**(1./temp)
         """
-        ##Reset the Tree here!!!!!!!
+        ##Reset the Tree here for a fair arena game (do not enable it when training)
         if instinctPlay:
             self.__init__(self.game, self.nnet, self.args) #to make the Arena work as expected instead of a large single tree.
         #comment: reset tree here make the Arena more fair, but it also loose somewhat acuracy
         #for test only
-
-
+        #
         #Add noise Improve the quality of sample (see Keta-Go paper)  
         # 25% of all do as many as numMCTSS searches, 75% do a quick search
         # Quick search add no noise
@@ -60,7 +59,6 @@ class MCTS():
             #print(isFast)
             for i in range(self.args.numMCTSSims):
                 self.search(canonicalBoard, noise=False, challenge=challenge)
-
         s = self.game.stringRepresentation(canonicalBoard)
         counts = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in range(self.game.getActionSize())]
         #print(counts)
@@ -74,24 +72,20 @@ class MCTS():
             bestA = np.random.choice(bestAs)
             probs = [0] * len(counts)
             probs[bestA] = 1    
-            #print(self.Qsa[(s, bestA)])       
-            return probs, isFast
+            resign = False
+            if self.Qsa[(s, bestA)] < self.args.resignThreshold: #resign when best Q value less than threshold
+                resign = True 
+            return probs, isFast, resign
         #print(counts)
         counts = [x ** (1. / temp) for x in counts]
         #print(counts)
         counts_sum = float(sum(counts))
-
-
         if counts_sum != 0:
             probs = [x / counts_sum for x in counts]
-
         else: #vary rare, but it may happen due to the 'ko'
             probs = [0 for x in counts]
             probs[-1] = 1
-
-
-
-        return probs, isFast
+        return probs, isFast, False
 
     #For fastDecision, no further noise add to p
     def search(self, canonicalBoard, noise=True, challenge=False):

@@ -23,6 +23,8 @@ args = dotdict({
     'arenaNumMCTSSims': 2,      # simulations for arena
     'instinctArena': True,      # if set true reset Arena's MTCL tree each time
     'balancedGame': False,      # if balanced, black should win over 6 scores
+    'resignThreshold': -0.999999, # No Use. Resign Only in self-play Training
+
 
 })
 

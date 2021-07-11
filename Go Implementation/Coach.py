@@ -56,7 +56,7 @@ class Coach():
             canonicalBoard = self.game.getCanonicalForm(board, self.curPlayer)
             temp = int(episodeStep < self.args.tempThreshold)
             #fastDecision data should not be collected (ketaGo Paper)
-            pi, fastDecision = self.mcts.getActionProb(canonicalBoard, temp=temp, training=1)
+            pi, fastDecision, resign = self.mcts.getActionProb(canonicalBoard, temp=temp, training=1)
             sym = self.game.getSymmetries(canonicalBoard, pi)
             for b, p in sym:
                 if not fastDecision:  #only add example of slow decisions
@@ -64,9 +64,9 @@ class Coach():
 
             action = np.random.choice(len(pi), p=pi)
             board, self.curPlayer = self.game.getNextState(board, self.curPlayer, action)
-
             r = self.game.getGameEnded(board, self.curPlayer)
-
+            if resign:
+                r = 1 # previous player resigned          
             if r != 0:
                 return [(x[0], x[2], r * ((-1) ** (x[1] != self.curPlayer))) for x in trainExamples]
 
