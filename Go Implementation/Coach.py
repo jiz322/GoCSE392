@@ -101,7 +101,7 @@ class Coach():
             # backup history to a file
             # NB! the examples were collected using the model from the previous iteration, so (i-1)  
             self.saveTrainExamples(i - 1)
-            self.loadExamples(i - 1)
+            self.loadExamples(i - 1) #see if this get larger
             # shuffle examples before training
             trainExamples = []
             for e in self.trainExamplesHistory:
