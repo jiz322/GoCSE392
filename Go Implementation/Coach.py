@@ -101,7 +101,7 @@ class Coach():
             # backup history to a file
             # NB! the examples were collected using the model from the previous iteration, so (i-1)  
             self.saveTrainExamples(i - 1)
-
+            self.loadExamples(i - 1)
             # shuffle examples before training
             trainExamples = []
             for e in self.trainExamplesHistory:
@@ -168,3 +168,13 @@ class Coach():
             # do not skip if it loads the best
             if not loadBest:
                 self.skipFirstSelfPlay = True
+    #load examples only
+    def loadExamples(self, iteratioin):
+        filename = os.path.join(folder, self.getCheckpointFile(iteration) + ".examples")
+        log.info("File with trainExamples found. Loading it...")
+        with open(filename, "rb") as f:
+            self.trainExamplesHistory = Unpickler(f).load()
+        log.info('Loading done!')
+
+
+
