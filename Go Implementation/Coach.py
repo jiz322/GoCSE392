@@ -86,6 +86,7 @@ class Coach():
         for i in range(1, self.args.numIters + 1):
             # bookkeeping
             log.info(f'Starting Iter #{i} ...')
+            self.trainExamplesHistory = [] # empty the history 
             # examples of the iteration
             if not self.skipFirstSelfPlay or i > 1:
                 iterationTrainExamples = deque([], maxlen=self.args.maxlenOfQueue)
@@ -100,8 +101,8 @@ class Coach():
                 self.trainExamplesHistory.pop(0)
             # backup history to a file
             # NB! the examples were collected using the model from the previous iteration, so (i-1)  
-            self.saveTrainExamples(i - 1)
-            self.loadExamples(i - 1) #see if this get larger
+            self.saveTrainExamples()
+            self.loadExamples() #see if this get larger
             # shuffle examples before training
             trainExamples = []
             for e in self.trainExamplesHistory:
@@ -139,14 +140,12 @@ class Coach():
         return 'checkpoint_' + str(iteration) + '.pth.tar'
 
     #add the way to save best example
-    def saveTrainExamples(self, iteration, saveBest=False):
+    def saveTrainExamples(self):
         folder = self.args.checkpoint
         if not os.path.exists(folder):
             os.makedirs(folder)
-        filename = os.path.join(folder, self.getCheckpointFile(iteration) + ".examples")
-        if saveBest:
-            filename = "best.pth.tar.examples"
-        with open(filename, "wb+") as f:
+        filename = os.path.join(folder, "best.pth.tar.examples")
+        with open(filename, "ab+") as f:
             Pickler(f).dump(self.trainExamplesHistory)
         f.closed
 
@@ -169,11 +168,21 @@ class Coach():
             if not loadBest:
                 self.skipFirstSelfPlay = True
     #load examples only
-    def loadExamples(self, iteratioin):
-        filename = os.path.join(folder, self.getCheckpointFile(iteration) + ".examples")
+    def loadExamples(self):
+        folder = self.args.checkpoint
+        filename = os.path.join(folder, "best.pth.tar.examples")
         log.info("File with trainExamples found. Loading it...")
         with open(filename, "rb") as f:
-            self.trainExamplesHistory = Unpickler(f).load()
+            count = 0
+            while True:
+                try:
+                    if count == 0:
+                        self.trainExamplesHistory = Unpickler(f).load()
+                        count += 1
+                    else:
+                        self.trainExamplesHistory += Unpickler(f).load()
+                except EOFError:
+                    break 
         log.info('Loading done!')
 
 

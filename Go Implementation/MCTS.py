@@ -73,6 +73,7 @@ class MCTS():
             probs = [0] * len(counts)
             probs[bestA] = 1    
             resign = False
+            #print(self.Qsa[(s, bestA)] )
             if self.Qsa[(s, bestA)] < self.args.resignThreshold: #resign when best Q value less than threshold
                 resign = True 
             return probs, isFast, resign
