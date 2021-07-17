@@ -3,7 +3,7 @@ import math
 
 import numpy as np
 
-EPS = 1
+EPS = 1e-8
 
 log = logging.getLogger(__name__)
 
@@ -46,8 +46,8 @@ class MCTS():
         # 25% of all do as many as numMCTSS searches, 75% do a quick search
         # Quick search add no noise
         # Only slow searches are recorded, so return isFast and pass it to Coach
-        fastDecision = int(0.2*self.args.numMCTSSims)                                          
-        noised_numMCTSSims = np.random.choice([self.args.numMCTSSims, fastDecision], p=[1, 0])
+        fastDecision = int(0.25*self.args.numMCTSSims)                                          
+        noised_numMCTSSims = np.random.choice([self.args.numMCTSSims, fastDecision], p=[0.25, 0.75])
         isFast = (noised_numMCTSSims == fastDecision)
         if training == 1: # in self-iteration
             for i in range(noised_numMCTSSims):
@@ -67,15 +67,21 @@ class MCTS():
         # Then, we mask it 0.
         valids = self.game.getValidMoves(canonicalBoard, 1)
         counts = counts * valids 
+        #If it is searched more than 350 time, consider it as non-fast decision
+        if np.max(counts) > 350:
+            isFast = False
         if temp == 0:
             bestAs = np.array(np.argwhere(counts == np.max(counts))).flatten()
             bestA = np.random.choice(bestAs)
             probs = [0] * len(counts)
             probs[bestA] = 1    
             resign = False
-            #print(self.Qsa[(s, bestA)] )
-            if self.Qsa[(s, bestA)] < self.args.resignThreshold: #resign when best Q value less than threshold
-                resign = True 
+            try:
+                #print(self.Qsa[(s, bestA)] )
+                if self.Qsa[(s, bestA)] < self.args.resignThreshold: #resign when best Q value less than threshold
+                    resign = True 
+            except KeyError as e:
+                print("get Ket error")
             return probs, isFast, resign
         #print(counts)
         counts = [x ** (1. / temp) for x in counts]

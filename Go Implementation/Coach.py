@@ -183,6 +183,8 @@ class Coach():
                         self.trainExamplesHistory += Unpickler(f).load()
                 except EOFError:
                     break 
+        while len(self.trainExamplesHistory) > self.args.numItersForTrainExamplesHistory:
+            self.trainExamplesHistory.pop(0)
         log.info('Loading done!')
 
 
