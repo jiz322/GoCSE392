@@ -158,8 +158,8 @@ class OthelloGame(Game):
         #print('self.goGame.game.board.pre_previous_is_pass')
         if self.args.balancedGame is True:
             if ((self.goGame.game.board.previous_is_pass and self.goGame.game.board.pre_previous_is_pass) or board.turns > self.n*self.n*3/2):
-                board.previous_is_pass = False
-                board.pre_previous_is_pass = False
+                #print('enddd')
+                #print(board)
                 diff = self.goGame.game.get_scores().get(player) - self.goGame.game.get_scores().get(-player)
                 #print(self.goGame.game.board)
                 if board.turns%2 and diff > -6:
@@ -175,8 +175,6 @@ class OthelloGame(Game):
                 return 0
         else:
             if ((self.goGame.game.board.previous_is_pass and self.goGame.game.board.pre_previous_is_pass) or board.turns > self.n*self.n*3/2):
-                board.previous_is_pass = False
-                board.pre_previous_is_pass = False
                 diff = self.goGame.game.get_scores().get(player) - self.goGame.game.get_scores().get(-player)
                 if diff > 0:
                     return 1
