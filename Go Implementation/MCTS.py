@@ -25,9 +25,11 @@ class MCTS():
         self.Es = {}  # stores game.getGameEnded ended for board s
         self.Vs = {}  # stores game.getValidMoves for board s
 
+        self.capFlag = False #True if reaches simulation cap
+
 
     # Noise only add to training mode (not for Arena Nor pit)
-    def getActionProb(self, canonicalBoard, temp=1, training=0, arena=0, instinctPlay=False, challenge=False):
+    def getActionProb(self, canonicalBoard, temp=1, training=0, arena=0, instinctPlay=False):
         """
         This function performs numMCTSSims simulations of MCTS starting from
         canonicalBoard.
@@ -52,21 +54,24 @@ class MCTS():
         if training == 1: # in self-iteration
             #for i in range(noised_numMCTSSims):
             while(True):
-                self.search(canonicalBoard, noise=not isFast) # Dirichlet noise only in slow decision
-                if max(self.Nsa.values()) == noised_numMCTSSims:
+                self.search(canonicalBoard, noise=not isFast, sim=noised_numMCTSSims) # Dirichlet noise only in slow decision
+                if self.capFlag:
+                    self.capFlag = False
                     break
         if arena == 1: # in arena
             #for i in range(self.args.arenaNumMCTSSims):
             while(True):
-                self.search(canonicalBoard, noise=False)
-                if max(self.Nsa.values()) == self.args.arenaNumMCTSSims:
+                self.search(canonicalBoard, noise=False, sim=self.args.arenaNumMCTSSims)
+                if self.capFlag:
+                    self.capFlag = False
                     break
         if training == 0 and arena == 0:
             #print(isFast)
             #for i in range(self.args.numMCTSSims):
             while(True):
-                self.search(canonicalBoard, noise=False, challenge=challenge)
-                if max(self.Nsa.values()) == self.args.numMCTSSims:
+                self.search(canonicalBoard, noise=False, sim=self.args.numMCTSSims)
+                if self.capFlag:
+                    self.capFlag = False
                     break
         s = self.game.stringRepresentation(canonicalBoard)
         counts = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in range(self.game.getActionSize())]
@@ -99,7 +104,7 @@ class MCTS():
         return probs, isFast, False
 
     #For fastDecision, no further noise add to p
-    def search(self, canonicalBoard, noise=True, challenge=False):
+    def search(self, canonicalBoard, noise=True, sim=0):
         """
         This function performs one iteration of MCTS. It is recursively called
         till a leaf node is found. The action chosen at each node is one that
@@ -193,10 +198,6 @@ class MCTS():
                 if (s, a) in self.Qsa:
                     u = self.Qsa[(s, a)] + self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s] - self.Nsa[(s, a)] + 1) / (
                             1 + self.Nsa[(s, a)])
-
-                    if challenge:
-                        u = self.Qsa[(s, a)] + self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s] - self.Nsa[(s, a)] + 1) / (
-                                1 + self.Nsa[(s, a)])
                 else:
                     u = self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s] + EPS)  # Q = 0 ?
 
@@ -211,12 +212,13 @@ class MCTS():
         next_s = self.game.getCanonicalForm(next_s, next_player)
         #print("CanonicalForm")
         #print(next_s)
-        v = self.search(next_s, noise=False) #keta Paper: dirichlet noise only add to root
+        v = self.search(next_s, noise=False, sim=sim) #keta Paper: dirichlet noise only add to root
 
         if (s, a) in self.Qsa:
             self.Qsa[(s, a)] = (self.Nsa[(s, a)] * self.Qsa[(s, a)] + v) / (self.Nsa[(s, a)] + 1)
             self.Nsa[(s, a)] += 1
-
+            if self.Nsa[(s, a)] == 200:
+                self.capFlag = True
         else:
             self.Qsa[(s, a)] = v
             self.Nsa[(s, a)] = 1
