@@ -53,20 +53,20 @@ class MCTS():
             #for i in range(noised_numMCTSSims):
             while(True):
                 self.search(canonicalBoard, noise=not isFast) # Dirichlet noise only in slow decision
-                if max(Nsa.values()) == noised_numMCTSSims:
+                if max(self.Nsa.values()) == noised_numMCTSSims:
                     break
         if arena == 1: # in arena
             #for i in range(self.args.arenaNumMCTSSims):
             while(True):
                 self.search(canonicalBoard, noise=False)
-                if max(Nsa.values()) == self.args.arenaNumMCTSSims:
+                if max(self.Nsa.values()) == self.args.arenaNumMCTSSims:
                     break
         if training == 0 and arena == 0:
             #print(isFast)
             #for i in range(self.args.numMCTSSims):
             while(True):
                 self.search(canonicalBoard, noise=False, challenge=challenge)
-                if max(Nsa.values()) == self.args.numMCTSSims:
+                if max(self.Nsa.values()) == self.args.numMCTSSims:
                     break
         s = self.game.stringRepresentation(canonicalBoard)
         counts = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in range(self.game.getActionSize())]
