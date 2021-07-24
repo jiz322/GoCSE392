@@ -50,26 +50,30 @@ class MCTS():
         noised_numMCTSSims = np.random.choice([self.args.numMCTSSims, fastDecision], p=[0.25, 0.75])
         isFast = (noised_numMCTSSims == fastDecision)
         if training == 1: # in self-iteration
-            for i in range(noised_numMCTSSims):
+            #for i in range(noised_numMCTSSims):
+            while(True):
                 self.search(canonicalBoard, noise=not isFast) # Dirichlet noise only in slow decision
+                if np.max(counts) == noised_numMCTSSims:
+                    break
         if arena == 1: # in arena
-            for i in range(self.args.arenaNumMCTSSims):
+            #for i in range(self.args.arenaNumMCTSSims):
+            while(True):
                 self.search(canonicalBoard, noise=False)
+                if np.max(counts) == self.args.arenaNumMCTSSims:
+                    break
         if training == 0 and arena == 0:
             #print(isFast)
-            for i in range(self.args.numMCTSSims):
+            #for i in range(self.args.numMCTSSims):
+            while(True):
                 self.search(canonicalBoard, noise=False, challenge=challenge)
+                if np.max(counts) == self.args.numMCTSSims:
+                    break
         s = self.game.stringRepresentation(canonicalBoard)
         counts = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in range(self.game.getActionSize())]
-        #print(counts)
-        #print([self.Qsa[(s, a)] if (s, a) in self.Qsa else 0 for a in range(self.game.getActionSize())])
         # For go, the highest NSA may not a legal move due to the rule of 'ko' 
         # Then, we mask it 0.
         valids = self.game.getValidMoves(canonicalBoard, 1)
         counts = counts * valids 
-        #If it is searched more than 350 time, consider it as non-fast decision
-        if np.max(counts) > 350:
-            isFast = False
         if temp == 0:
             bestAs = np.array(np.argwhere(counts == np.max(counts))).flatten()
             bestA = np.random.choice(bestAs)
