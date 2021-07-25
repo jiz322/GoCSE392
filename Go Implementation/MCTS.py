@@ -52,23 +52,33 @@ class MCTS():
         noised_numMCTSSims = np.random.choice([self.args.numMCTSSims, fastDecision], p=[0.25, 0.75])
         isFast = (noised_numMCTSSims == fastDecision)
         if training == 1: # in self-iteration
-            #for i in range(noised_numMCTSSims):
+            i = 0
             while(True):
+                i += 1
+                if i == 8000: #cap at 8000 total
+                    break
                 self.search(canonicalBoard, noise=not isFast, sim=noised_numMCTSSims) # Dirichlet noise only in slow decision
                 if self.capFlag:
                     self.capFlag = False
                     break
         if arena == 1: # in arena
-            #for i in range(self.args.arenaNumMCTSSims):
+            #Also add keta noise to arena, but not dirichlet.
+            i = 0
             while(True):
-                self.search(canonicalBoard, noise=False, sim=self.args.arenaNumMCTSSims)
+                i += 1
+                if i == 8000: #cap at 8000 total
+                    break
+                self.search(canonicalBoard, noise=False, sim=noised_numMCTSSims)
                 if self.capFlag:
                     self.capFlag = False
                     break
         if training == 0 and arena == 0:
-            #print(isFast)
-            #for i in range(self.args.numMCTSSims):
+            #For testing out of learning
+            i = 0
             while(True):
+                i += 1
+                if i == 8000: #cap at 8000 total
+                    break
                 self.search(canonicalBoard, noise=False, sim=self.args.numMCTSSims)
                 if self.capFlag:
                     self.capFlag = False
@@ -86,7 +96,10 @@ class MCTS():
             probs[bestA] = 1    
             resign = False
             try:
-                #print(self.Qsa[(s, bestA)] )
+                if training == 0 and arena == 0: #print info for testing outside of learning
+                    print(np.array(self.Ps[s][:-1]).reshape(9,9))
+                    print(np.array(counts[:-1]).reshape(9,9))
+                    print(self.Qsa[(s, bestA)] )
                 if self.Qsa[(s, bestA)] < self.args.resignThreshold: #resign when best Q value less than threshold
                     resign = True 
             except KeyError as e:
@@ -199,7 +212,7 @@ class MCTS():
                     u = self.Qsa[(s, a)] + self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s] - self.Nsa[(s, a)] + 1) / (
                             1 + self.Nsa[(s, a)])
                 else:
-                    u = self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s] + EPS)  # Q = 0 ?
+                    u = 10*self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s] + EPS)  # Q = 0 ?
 
                 if u > cur_best:
                     cur_best = u
@@ -207,11 +220,7 @@ class MCTS():
 
         a = best_act
         next_s, next_player = self.game.getNextState(canonicalBoard, 1, a)
-        #print("next_s")  DEBUG
-        #print(next_s)
         next_s = self.game.getCanonicalForm(next_s, next_player)
-        #print("CanonicalForm")
-        #print(next_s)
         v = self.search(next_s, noise=False, sim=sim) #keta Paper: dirichlet noise only add to root
 
         if (s, a) in self.Qsa:
