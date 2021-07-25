@@ -84,6 +84,7 @@ class Coach():
         """
 
         for i in range(1, self.args.numIters + 1):
+            self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
             # bookkeeping
             log.info(f'Starting Iter #{i} ...')
             self.trainExamplesHistory = [] # empty the history 
@@ -95,46 +96,11 @@ class Coach():
                     iterationTrainExamples += self.executeEpisode()
                 # save the iteration examples to the history 
                 self.trainExamplesHistory.append(iterationTrainExamples)
-            if len(self.trainExamplesHistory) > self.args.numItersForTrainExamplesHistory:
-                log.warning(
-                    f"Removing the oldest entry in trainExamples. len(trainExamplesHistory) = {len(self.trainExamplesHistory)}")
-                self.trainExamplesHistory.pop(0)
             # backup history to a file
             # NB! the examples were collected using the model from the previous iteration, so (i-1)  
             self.saveTrainExamples()
-            self.loadExamples() #see if this get larger
-            # shuffle examples before training
-            trainExamples = []
-            for e in self.trainExamplesHistory:
-                trainExamples.extend(e)
-            shuffle(trainExamples)
-            self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')# training new network, keeping a copy of the old one              
-            self.nnet.train(trainExamples)
-            nmcts = MCTS(self.game, self.nnet, self.args)
-            if not self.firstIter:
-                self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar') #Load the best after training to maximize efficenty
-                pmcts = MCTS(self.game, self.pnet, self.args)
-                log.info('PITTING AGAINST PREVIOUS VERSION')
-                arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=1, arena=1, instinctPlay=self.args.instinctArena)[0]),
-                            lambda x: np.argmax(nmcts.getActionProb(x, temp=1, arena=1, instinctPlay=self.args.instinctArena)[0]), self.game)
-                pwins, nwins, draws, pwins_black = arena.playGames(self.args.arenaCompare)
-                log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d ; PREV_WinOnBlack : %d' % (nwins, pwins, draws, pwins_black))
-                if pwins + nwins == 0 or float(nwins) / (pwins + nwins) < self.args.updateThreshold:
-                    log.info('REJECTING NEW MODEL')
-                    #load the current best after reject
-                    self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
-                    #self.loadTrainExamples(loadBest=True) 
-                    # Keep the example the same!!!!!!!
-                else:
-                    log.info('ACCEPTING NEW MODEL')
-                    self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
-                    self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
-
-            else: #first iteratioin, just accept it so that we have best.pth.tar
-                log.info('ACCEPTING NEW MODEL')
-                self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
-                self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
-                self.firstIter = False
+           # self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
+          
 
     def getCheckpointFile(self, iteration):
         return 'checkpoint_' + str(iteration) + '.pth.tar'
