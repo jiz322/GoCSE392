@@ -115,43 +115,7 @@ class Coach():
             Pickler(f).dump(self.trainExamplesHistory)
         f.closed
 
-    #add the way to load best example
-    def loadTrainExamples(self, loadBest=False):
-        modelFile = os.path.join(self.args.load_folder_file[0], self.args.load_folder_file[1])
-        examplesFile = modelFile + ".examples"
-        if loadBest:
-            examplesFile = "best.pth.tar.examples"
-        if not os.path.isfile(examplesFile):
-            log.warning(f'File "{examplesFile}" with trainExamples not found!')
-        else:
-            log.info("File with trainExamples found. Loading it...")
-            with open(examplesFile, "rb") as f:
-                self.trainExamplesHistory = Unpickler(f).load()
-            log.info('Loading done!')
 
-            # examples based on the model were already collected (loaded)
-            # do not skip if it loads the best
-            if not loadBest:
-                self.skipFirstSelfPlay = True
-    #load examples only
-    def loadExamples(self):
-        folder = self.args.checkpoint
-        filename = os.path.join(folder, "best.pth.tar.examples")
-        log.info("File with trainExamples found. Loading it...")
-        with open(filename, "rb") as f:
-            count = 0
-            while True:
-                try:
-                    if count == 0:
-                        self.trainExamplesHistory = Unpickler(f).load()
-                        count += 1
-                    else:
-                        self.trainExamplesHistory += Unpickler(f).load()
-                except EOFError:
-                    break 
-        while len(self.trainExamplesHistory) > self.args.numItersForTrainExamplesHistory:
-            self.trainExamplesHistory.pop(0)
-        log.info('Loading done!')
 
 
 
