@@ -156,6 +156,10 @@ class MCTS():
             #print('if self.Es[s] != 0:')
             #print(canonicalBoard)
             # terminal node
+
+            #empty passes
+            canonicalBoard.pre_previous_is_pass = False
+            canonicalBoard.previous_is_pass = False
             return -self.Es[s]
 
         if s not in self.Ps:                        #bug take away: copy using .copy

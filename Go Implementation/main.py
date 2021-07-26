@@ -13,6 +13,7 @@ coloredlogs.install(level='INFO')  # Change this to DEBUG to see more info.
 
 args = dotdict({
     'size': 9,                  #board size
+    'numIters': 1000,
     'tempThreshold': 0,        # zero
     'numMCTSSims': 200,          # Number of games moves for MCTS to simulate.
     'arenaNumMCTSSims': 200,      #simulation for arena

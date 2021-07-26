@@ -119,21 +119,21 @@ class Coach():
             self.trainExamplesHistory.pop(0)
         log.info('Loading done!')
 
-    def playGame(player1, str1, player2, str2):
-        arena = Arena.Arena(player1, player2, g)
-        x, y, z, xb = arena.playGames(args.arenaCompare, verbose=False)
+    def playGame(self, player1, str1, player2, str2):
+        arena = Arena(player1, player2, self.game)
+        x, y, z, xb = arena.playGames(self.args.arenaCompare, verbose=False)
         print(str1, " win: ", x)
         print(str2, " win: ", y)
         print(str1, " win black: ", xb)
         return x, y
 
-    def tournament(playList):
+    def tournament(self, playList):
         tournamentResult = dict.fromkeys(playList, 0)
         repeat = [] #each player only play 2 games with each other
         for a in playList:
             for b in playList:
                 #this 
-                if playList.index(a)+1)*(playList.index(b)+1) not in repeat:
+                if (playList.index(a)+1)*(playList.index(b)+1) not in repeat:
                     if a is not b:
                         aWin, bWin = self.playGame(a, 'p1', b, 'p2')           
                         tournamentResult[a] += (aWin - bWin + args.arenaCompare)/2
