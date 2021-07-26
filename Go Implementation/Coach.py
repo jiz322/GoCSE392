@@ -79,11 +79,11 @@ class Coach():
             pmcts = MCTS(self.game, self.pnet, self.args)
             log.info('Arena Start! A tournament between PREVIOUS VERSION and 4 new ones!')
 
-            player_prev = lambda x: np.argmax(pmcts.getActionProb(x, temp=0)[0])
-            player_n = lambda x: np.argmax(nmcts.getActionProb(x, temp=0)[0])
-            player_n2 = lambda x: np.argmax(n2mcts.getActionProb(x, temp=0)[0])
-            player_n3 = lambda x: np.argmax(n3mcts.getActionProb(x, temp=0)[0])
-            player_n4 = lambda x: np.argmax(n4mcts.getActionProb(x, temp=0)[0])
+            player_prev = lambda x: np.argmax(pmcts.getActionProb(x, temp=0, arena=1)[0])
+            player_n = lambda x: np.argmax(nmcts.getActionProb(x, temp=0, arena=1)[0])
+            player_n2 = lambda x: np.argmax(n2mcts.getActionProb(x, temp=0, arena=1)[0])
+            player_n3 = lambda x: np.argmax(n3mcts.getActionProb(x, temp=0, arena=1)[0])
+            player_n4 = lambda x: np.argmax(n4mcts.getActionProb(x, temp=0, arena=1)[0])
 
             playerList = [player_prev, player_n, player_n2, player_n3, player_n4]
             mctsList = [pmcts, nmcts, n2mcts, n3mcts, n4mcts]
@@ -136,7 +136,7 @@ class Coach():
                 if (playList.index(a)+1)*(playList.index(b)+1) not in repeat:
                     if a is not b:
                         aWin, bWin = self.playGame(a, 'p1', b, 'p2')           
-                        tournamentResult[a] += (aWin - bWin + args.arenaCompare)/2
-                        tournamentResult[b] += (bWin - aWin + args.arenaCompare)/2
+                        tournamentResult[a] += (aWin - bWin + self.args.arenaCompare)/2
+                        tournamentResult[b] += (bWin - aWin + self.args.arenaCompare)/2
                         repeat.append((playList.index(a)+1)*(playList.index(b)+1))
         return list(tournamentResult.values())

@@ -57,7 +57,7 @@ class OthelloGame(Game):
             board.previous_is_pass = True
             board.turns += 1
             return (board, -player)
-
+        
         move = (int(action/self.n), action%self.n) #Interpret the Action
 
         # initialize the board and group manager for simulating
@@ -74,12 +74,12 @@ class OthelloGame(Game):
         #load necessary fields back to the board
         board = copy.deepcopy(self.goGame.game.board)
         board.previous_is_pass = False
+        board.pre_previous_is_pass = False
         board.turns += 1
         board._group_map = copy.deepcopy(self.goGame.game.gm._group_map)
         board._captured_groups = copy.deepcopy(self.goGame.game.gm._captured_groups)
         board._num_captured_stones = copy.deepcopy(self.goGame.game.gm._num_captured_stones)
         board._ko = copy.deepcopy(self.goGame.game.gm._ko)
-
         #bug log
         #print("turns", board.turns)
         #print(self.goGame.game.board)

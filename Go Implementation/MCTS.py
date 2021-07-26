@@ -68,7 +68,7 @@ class MCTS():
                 i += 1
                 if i == 8000: #cap at 8000 total
                     break
-                self.search(canonicalBoard, noise=False, sim=noised_numMCTSSims)
+                self.search(canonicalBoard, noise=False, sim=self.args.numMCTSSims)
                 if self.capFlag:
                     self.capFlag = False
                     break
