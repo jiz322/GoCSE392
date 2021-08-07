@@ -221,7 +221,7 @@ class OthelloGame(Game):
         return l
 
     def stringRepresentation(self, board):
-        return board.tostring()
+        return board.tostring() + str(board.turns).encode()
 
     def stringRepresentationReadable(self, board):
         board_s = "".join(self.square_content[square] for row in board for square in row)

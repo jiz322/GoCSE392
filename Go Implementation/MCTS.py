@@ -117,7 +117,7 @@ class MCTS():
         return probs, isFast, False
 
     #For fastDecision, no further noise add to p
-    def search(self, canonicalBoard, noise=True, sim=0):
+    def search(self, canonicalBoard, noise=True, sim=0, pre_pass=False, pre_pre_pass=False, level=0):
         """
         This function performs one iteration of MCTS. It is recursively called
         till a leaf node is found. The action chosen at each node is one that
@@ -145,22 +145,23 @@ class MCTS():
         #!! DIFFERENT LOGIC HERE FOR GO TO AVOID STACKOVERFLOW
         #if s not in self.Es:
             #print('if s not in self.Es:')
-        self.Es[s] = self.game.getGameEnded(canonicalBoard, 1)
+        if pre_pass and pre_pre_pass:
+            self.Es[s] = self.game.getGameEnded(canonicalBoard, 1)
 
 
 
-        #print("===Es[s]===")  
-        #print(self.Es[s])
-        #print("^^^Es[s]===")  
-        if self.Es[s] != 0:
-            #print('if self.Es[s] != 0:')
-            #print(canonicalBoard)
-            # terminal node
+            #print("===Es[s]===")  
+            #print(self.Es[s])
+            #print("^^^Es[s]===")  
+            if self.Es[s] != 0:
+                #print('if self.Es[s] != 0:')
+                #print(canonicalBoard)
+                # terminal node
 
-            #empty passes
-            canonicalBoard.pre_previous_is_pass = False
-            canonicalBoard.previous_is_pass = False
-            return -self.Es[s]
+                #empty passes
+                canonicalBoard.pre_previous_is_pass = False
+                canonicalBoard.previous_is_pass = False
+                return -self.Es[s]
 
         if s not in self.Ps:                        #bug take away: copy using .copy
             #print('if s not in self.Ps:')
@@ -225,7 +226,14 @@ class MCTS():
         a = best_act
         next_s, next_player = self.game.getNextState(canonicalBoard, 1, a)
         next_s = self.game.getCanonicalForm(next_s, next_player)
-        v = self.search(next_s, noise=False, sim=sim) #keta Paper: dirichlet noise only add to root
+
+        if a == 81:
+            if not pre_pass:
+                v = self.search(next_s, noise=False, sim=sim, pre_pass=True)
+            else:
+                v = self.search(next_s, noise=False, sim=sim, pre_pass=True, pre_pre_pass=True)
+        else:
+            v = self.search(next_s, noise=False, sim=sim) #keta Paper: dirichlet noise only add to root
 
         if (s, a) in self.Qsa:
             self.Qsa[(s, a)] = (self.Nsa[(s, a)] * self.Qsa[(s, a)] + v) / (self.Nsa[(s, a)] + 1)
