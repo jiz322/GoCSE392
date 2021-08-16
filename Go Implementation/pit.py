@@ -1,8 +1,8 @@
 import Arena
 from MCTS import MCTS
-from othello.OthelloGame import OthelloGame
-from othello.OthelloPlayers import *
-from othello.pytorch.NNet import NNetWrapper as NNet
+from go.GoGame import GoGame
+from go.GoPlayers import *
+from go.pytorch.NNet import NNetWrapper as NNet
 
 
 import numpy as np
@@ -26,12 +26,12 @@ args = dotdict({
 human_vs_cpu = True
 
 
-g = OthelloGame(args)
+g = GoGame(args)
 
 # all players
 rp = RandomPlayer(g).play
-#gp = GreedyOthelloPlayer(g).play
-hp = HumanOthelloPlayer(g).play
+#gp = GreedyGoPlayer(g).play
+hp = HumanGoPlayer(g).play
 
 
 
@@ -45,7 +45,7 @@ n1p = lambda x: np.argmax(mcts1.getActionProb(x, temp=0,instinctPlay=args.instin
 player2 = hp
 
 
-arena = Arena.Arena(player2, n1p, g, display=OthelloGame.display)
+arena = Arena.Arena(player2, n1p, g, display=GoGame.display)
 y, x, z, xb = arena.playGames(2, verbose=True)
 print("Bots win: ", x)
 print("Human win: ", y)

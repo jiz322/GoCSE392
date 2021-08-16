@@ -1,8 +1,8 @@
 import Arena
 from MCTS import MCTS
-from othello.OthelloGame import OthelloGame
-from othello.OthelloPlayers import *
-from othello.pytorch.NNet import NNetWrapper as NNet
+from go.GoGame import GoGame
+from go.GoPlayers import *
+from go.pytorch.NNet import NNetWrapper as NNet
 import numpy as np
 import random
 import operator
@@ -29,10 +29,10 @@ args = dotdict({
 })
 
 
-g = OthelloGame(args)
+g = GoGame(args)
 
 rp = RandomPlayer(g).play
-hp = HumanOthelloPlayer(g).play
+hp = HumanGoPlayer(g).play
 
 
 def createNetPlayer(dirr, tarName, sim=args.numMCTSSims, cpuct=args.cpuct):

@@ -1,14 +1,14 @@
 #test getInitBoard
-import othello.OthelloGame as a
-g = a.OthelloGame(9)
+import go.GoGame as a
+g = a.GoGame(9)
 g.getInitBoard()
-from othello.OthelloLogic import Board
+from go.GoLogic import Board
 b = Board(9)
 import numpy as np
 print(np.array(b.pieces))
 #same result, test pass
 
-import othello.goGame as x
+import go.goGame as x
 a = x.GoGame()
 a.place_black(1,1)
 a.place_white(2,1)

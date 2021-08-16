@@ -8,7 +8,7 @@
 
      [ Games ]      Pytorch     Tensorflow  Keras
       -----------   -------     ----------  -----
-    - Othello       [Yes]       [Yes]       [Yes]
+    - Go       [Yes]       [Yes]       [Yes]
     - TicTacToe                             [Yes]
     - Connect4                  [Yes]
     - Gobang                    [Yes]       [Yes]
@@ -28,11 +28,11 @@ from tictactoe_3d.TicTacToeGame import TicTacToeGame as TicTacToe3DGame
 from tictactoe_3d.TicTacToePlayers import *
 from tictactoe_3d.keras.NNet import NNetWrapper as TicTacToe3DKerasNNet
 
-from othello.OthelloGame import OthelloGame
-from othello.OthelloPlayers import *
-from othello.pytorch.NNet import NNetWrapper as OthelloPytorchNNet
-from othello.tensorflow.NNet import NNetWrapper as OthelloTensorflowNNet
-from othello.keras.NNet import NNetWrapper as OthelloKerasNNet
+from go.GoGame import GoGame
+from go.GoPlayers import *
+from go.pytorch.NNet import NNetWrapper as GoPytorchNNet
+from go.tensorflow.NNet import NNetWrapper as GoTensorflowNNet
+from go.keras.NNet import NNetWrapper as GoKerasNNet
 
 from connect4.Connect4Game import Connect4Game
 from connect4.Connect4Players import *
@@ -59,14 +59,14 @@ class TestAllGames(unittest.TestCase):
         arena = Arena.Arena(n1p, rp, game)
         print(arena.playGames(2, verbose=False))
 
-    def test_othello_pytorch(self):
-        self.execute_game_test(OthelloGame(6), OthelloPytorchNNet)
+    def test_go_pytorch(self):
+        self.execute_game_test(GoGame(6), GoPytorchNNet)
 
-    def test_othello_tensorflow(self):
-        self.execute_game_test(OthelloGame(6), OthelloTensorflowNNet)
+    def test_go_tensorflow(self):
+        self.execute_game_test(GoGame(6), GoTensorflowNNet)
 
-    def test_othello_keras(self):
-        self.execute_game_test(OthelloGame(6), OthelloKerasNNet)
+    def test_go_keras(self):
+        self.execute_game_test(GoGame(6), GoKerasNNet)
 
     def test_tictactoe_keras(self):
         self.execute_game_test(TicTacToeGame(), TicTacToeKerasNNet)
