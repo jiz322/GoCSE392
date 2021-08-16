@@ -2,7 +2,7 @@ import logging
 import math
 
 import numpy as np
-
+from go.exceptions import (SelfDestructException, KoException, InvalidInputException)
 EPS = 1e-8
 
 log = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ class MCTS():
 
 
     # Noise only add to training mode (not for Arena Nor pit)
-    def getActionProb(self, canonicalBoard, temp=1, training=0, arena=0, instinctPlay=False):
+    def getActionProb(self, canonicalBoard, levelBased=False, temp=1, training=0, arena=0, instinctPlay=False, ew=0):
         """
         This function performs numMCTSSims simulations of MCTS starting from
         canonicalBoard.
@@ -51,44 +51,65 @@ class MCTS():
         fastDecision = int(0.25*self.args.numMCTSSims)                                          
         noised_numMCTSSims = np.random.choice([self.args.numMCTSSims, fastDecision], p=[0.25, 0.75])
         isFast = (noised_numMCTSSims == fastDecision)
-        if training == 1: # in self-iteration
+        # self-iteration 
+        # For level-based Training, Monte-Carlo Search for expected winner only
+        # Noise is generated only by fluctuating maxLevel
+        if training == 1:
+            level = self.args.maxLevel
+            noised_level = np.random.choice([level, level-2, level-4], p=[0.2, 0.3, 0.5])
             i = 0
+            print(noised_level)
+            #if white cheats, no simulator for black's turns
+            if ew == -1: 
+                if canonicalBoard.turns%2 == 0:
+                    i = -3
+            #if black cheats, no simulator for white's turns
+            if ew == 1:  
+                if canonicalBoard.turns%2 == 1:
+                    i = -3
             while(True):
                 i += 1
-                if i == 8000: #cap at 8000 total
+                if i == 0 or i == 4000: 
+                    #skip simulation to help the cheater
                     break
-                self.search(canonicalBoard, noise=not isFast, sim=noised_numMCTSSims) # Dirichlet noise only in slow decision
+                #Cheater's Turn.
+                self.search(canonicalBoard, canonicalBoard.turns, noise=True, sim=self.args.numMCTSSims, levelBased=self.args.levelBased, maxLevel=noised_level, maxLeaves=self.args.maxLeaves)
                 if self.capFlag:
                     self.capFlag = False
                     break
-        if arena == 1: # in arena
-            #Also add keta noise to arena, but not dirichlet.
+        if arena == 1: # in arena, IT HAS TO BE FAIR!! NO CHEATING!!
             i = 0
             while(True):
                 i += 1
-                if i == 8000: #cap at 8000 total
+                if i == 10000: #cap at 8000 total
                     break
-                self.search(canonicalBoard, noise=False, sim=noised_numMCTSSims)
+                self.search(canonicalBoard, canonicalBoard.turns, noise=False, sim=self.args.numMCTSSims, levelBased=self.args.levelBased, maxLevel=self.args.maxLevel, maxLeaves=self.args.maxLeaves)
                 if self.capFlag:
                     self.capFlag = False
                     break
         if training == 0 and arena == 0:
             #For testing out of learning
+            #Cheat or not, depends on the settings in pit.py
             i = 0
+            if canonicalBoard.turns%2 == 0:
+                i = -2
             while(True):
                 i += 1
-                if i == 8000: #cap at 8000 total
+                if i == -1: 
                     break
-                self.search(canonicalBoard, noise=False, sim=self.args.numMCTSSims)
+                self.search(canonicalBoard, canonicalBoard.turns, noise=False, sim=self.args.numMCTSSims, levelBased=levelBased, maxLeaves=self.args.maxLeaves)
                 if self.capFlag:
                     self.capFlag = False
                     break
-        s = self.game.stringRepresentation(canonicalBoard)
+        s = self.game.stringRepresentation(canonicalBoard)+ str(canonicalBoard.turns).encode()
         counts = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in range(self.game.getActionSize())]
         # For go, the highest NSA may not a legal move due to the rule of 'ko' 
         # Then, we mask it 0.
+        # Not sure if it's fixed, but is safe to keep it here
         valids = self.game.getValidMoves(canonicalBoard, 1)
         counts = counts * valids 
+        
+        #After add Kata-like noise, temp always set to 0
         if temp == 0:
             bestAs = np.array(np.argwhere(counts == np.max(counts))).flatten()
             bestA = np.random.choice(bestAs)
@@ -96,12 +117,16 @@ class MCTS():
             probs[bestA] = 1    
             resign = False
             try:
-                if training == 0 and arena == 0: #print info for testing outside of learning
-                    print(np.array(self.Ps[s][:-1]).reshape(9,9))
-                    print(np.array(counts[:-1]).reshape(9,9))
-                    print(self.Qsa[(s, bestA)] )
+                if True or training == 0 and arena == 0: #print info for testing outside of learning
+                     print(np.array(self.Ps[s][:-1]).reshape(9,9))
+                     print(self.Ps[s][-1])
+                     print(np.array(counts[:-1]).reshape(9,9))
+                     print(counts[-1])
+                     print(self.Qsa[(s, bestA)] )
+                     
                 if self.Qsa[(s, bestA)] < self.args.resignThreshold: #resign when best Q value less than threshold
                     resign = True 
+                    print("resign")
             except KeyError as e:
                 print("get Ket error")
             return probs, isFast, resign
@@ -117,7 +142,7 @@ class MCTS():
         return probs, isFast, False
 
     #For fastDecision, no further noise add to p
-    def search(self, canonicalBoard, noise=True, sim=0):
+    def search(self, canonicalBoard, turns, noise=True, sim=0, pre_pass=False, pre_pre_pass=False, level=0, levelBased=False, maxLevel=5, maxLeaves=10000000000):
         """
         This function performs one iteration of MCTS. It is recursively called
         till a leaf node is found. The action chosen at each node is one that
@@ -137,7 +162,7 @@ class MCTS():
             v: the negative of the value of the current canonicalBoard
         """
 
-        s = self.game.stringRepresentation(canonicalBoard)
+        s = self.game.stringRepresentation(canonicalBoard)+ str(turns+level).encode()
         #print('mcts')
         #print(canonicalBoard)
         #print('l78')
@@ -145,17 +170,25 @@ class MCTS():
         #!! DIFFERENT LOGIC HERE FOR GO TO AVOID STACKOVERFLOW
         #if s not in self.Es:
             #print('if s not in self.Es:')
-        self.Es[s] = self.game.getGameEnded(canonicalBoard, 1)
+        if (pre_pass and pre_pre_pass) or (turns+level > self.game.getMaxMoves()):
+            self.Es[s] = self.game.getGameEnded(canonicalBoard, 1)
 
 
 
         #print("===Es[s]===")  
         #print(self.Es[s])
         #print("^^^Es[s]===")  
-        if self.Es[s] != 0:
-            #print('if self.Es[s] != 0:')
+  #          if self.Es[s] != 0:
+  #              print('if self.Es[s] != 0:')
             #print(canonicalBoard)
             # terminal node
+            #canonicalBoard.pre_previous_is_pass = False
+           # canonicalBoard.previous_is_pass = False
+     #       a = 81
+      #      print(self.Nsa[(s, a)])
+       #     self.Nsa[(s, a)] += 1
+        #    if self.Nsa[(s, a)] >= sim:
+         #       self.capFlag = True
             return -self.Es[s]
 
         if s not in self.Ps:                        #bug take away: copy using .copy
@@ -176,8 +209,23 @@ class MCTS():
                 #print(newPs)
                 #print(0.25*np.random.dirichlet([0.03*canonicalBoard.board_size**2/valid_length]*len(self.Ps[s])))
             self.Ps[s] = self.Ps[s] * valids  # masking invalid moves
-            sum_Ps_s = np.sum(self.Ps[s])
             
+            if maxLevel < 100:
+                topN = []
+                for i in self.Ps[s]:
+                    topN.sort()
+                    if len(topN) == maxLeaves:
+                        if i > topN[0]:
+                            topN[0] = i
+                    else:
+                        topN.append(i)
+            
+                for i in range(1, len(self.Ps[s])):
+                    if self.Ps[s][i] not in topN:
+                        self.Ps[s][i] = 0
+                        
+                sum_Ps_s = np.sum(self.Ps[s])
+
             
             #print(v)
             if sum_Ps_s > 0:
@@ -211,26 +259,64 @@ class MCTS():
                 if (s, a) in self.Qsa:
                     u = self.Qsa[(s, a)] + self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s] - self.Nsa[(s, a)] + 1) / (
                             1 + self.Nsa[(s, a)])
+                elif self.Ps[s][a] < 1e-8:
+                    u = -10000000000
                 else:
-                    u = 10*self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s] + EPS)  # Q = 0 ?
+                    u = (10000000000001-maxLeaves)*self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s] + EPS)  # Q = 0 ?
 
                 if u > cur_best:
                     cur_best = u
                     best_act = a
 
         a = best_act
-        next_s, next_player = self.game.getNextState(canonicalBoard, 1, a)
+        try:
+            next_s, next_player = self.game.getNextState(canonicalBoard, 1, a)
+        except Exception as e:
+            #print(str(e))
+            e1 = InvalidInputException()
+            e2 = KoException()
+            e3 = SelfDestructException()
+            if type(e) is type(e1):
+                print("Invalid catched")
+                #return False
+            elif type(e) is type(e2):
+              #  print("ko catched in MTCL")
+               # return False
+                pass
+            elif type(e) is type(e3):
+                print("SelfDestruct catched")
+               # return False
+            else:
+                print(e)
+                print("other error exist")
         next_s = self.game.getCanonicalForm(next_s, next_player)
-        v = self.search(next_s, noise=False, sim=sim) #keta Paper: dirichlet noise only add to root
-
+        v = 0
+#        print("------------")
+ #       print("a is : ", a)
+  #      print("level is : ", level)
+        nsa = 0
+        if (s, a) in self.Nsa.keys():
+            nsa = self.Nsa[(s, a)]
+   #     print("Nsa is : ", nsa)
+        if a == 81:
+            if not pre_pass:
+                v = self.search(next_s,turns, noise=False, sim=sim, pre_pass=True, level=level+1, levelBased=levelBased, maxLevel=maxLevel, maxLeaves=maxLeaves)
+            else:
+                v = self.search(next_s,turns, noise=False, sim=sim, pre_pass=True, pre_pre_pass=True, level=level+1, levelBased=levelBased, maxLevel=maxLevel, maxLeaves=maxLeaves)
+        else:
+            v = self.search(next_s, turns, noise=False, sim=sim, level=level+1, levelBased=levelBased, maxLevel=maxLevel, maxLeaves=maxLeaves) #keta Paper: dirichlet noise only add to root
         if (s, a) in self.Qsa:
             self.Qsa[(s, a)] = (self.Nsa[(s, a)] * self.Qsa[(s, a)] + v) / (self.Nsa[(s, a)] + 1)
             self.Nsa[(s, a)] += 1
-            if self.Nsa[(s, a)] >= sim:
+            if self.Nsa[(s, a)] >= sim and level == 0 and not levelBased or (turns > 100):
                 self.capFlag = True
+            elif levelBased:
+                if level >= maxLevel:
+                    self.capFlag = True
         else:
             self.Qsa[(s, a)] = v
             self.Nsa[(s, a)] = 1
 
         self.Ns[s] += 1
         return -v
+

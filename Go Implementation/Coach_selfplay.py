@@ -50,13 +50,15 @@ class Coach():
         board = self.game.getInitBoard()
         self.curPlayer = 1
         episodeStep = 0
-
+        expectedWinner = np.random.choice([-1, 1], p=[0.5, 0.5])
+        log.info(f'Expected Winner #{expectedWinner}')
+        
         while True:
             episodeStep += 1
             canonicalBoard = self.game.getCanonicalForm(board, self.curPlayer)
             temp = int(episodeStep < self.args.tempThreshold)
             #fastDecision data should not be collected (ketaGo Paper)
-            pi, fastDecision, resign = self.mcts.getActionProb(canonicalBoard, temp=temp, training=1)
+            pi, fastDecision, resign = self.mcts.getActionProb(canonicalBoard, temp=temp, training=1, ew=expectedWinner)
             sym = self.game.getSymmetries(canonicalBoard, pi)
             for b, p in sym:
                 if not fastDecision:  #only add example of slow decisions
@@ -64,10 +66,17 @@ class Coach():
 
             action = np.random.choice(len(pi), p=pi)
             board, self.curPlayer = self.game.getNextState(board, self.curPlayer, action)
-            r = self.game.getGameEnded(board, self.curPlayer)
+            #log.info(f'After action board: #/n\n{board}')
+            r = self.game.getGameEnded(board, self.curPlayer)           
             if resign:
+                log.info(f'Resigned')
                 r = 1 # previous player resigned          
             if r != 0:
+                log.info(f'End Game Board')
+                log.info(f'#/n\n{board}')
+                log.info(f'Ending turn #{board.turns}')
+                winner = r*self.curPlayer
+                log.info(f'Winner: #{winner}')
                 return [(x[0], x[2], r * ((-1) ** (x[1] != self.curPlayer))) for x in trainExamples]
 
     def learn(self):
@@ -84,6 +93,7 @@ class Coach():
         """
 
         for i in range(1, self.args.numIters + 1):
+            self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
             # bookkeeping
             log.info(f'Starting Iter #{i} ...')
             self.trainExamplesHistory = [] # empty the history 
@@ -95,46 +105,11 @@ class Coach():
                     iterationTrainExamples += self.executeEpisode()
                 # save the iteration examples to the history 
                 self.trainExamplesHistory.append(iterationTrainExamples)
-            if len(self.trainExamplesHistory) > self.args.numItersForTrainExamplesHistory:
-                log.warning(
-                    f"Removing the oldest entry in trainExamples. len(trainExamplesHistory) = {len(self.trainExamplesHistory)}")
-                self.trainExamplesHistory.pop(0)
             # backup history to a file
             # NB! the examples were collected using the model from the previous iteration, so (i-1)  
             self.saveTrainExamples()
-            self.loadExamples() #see if this get larger
-            # shuffle examples before training
-            trainExamples = []
-            for e in self.trainExamplesHistory:
-                trainExamples.extend(e)
-            shuffle(trainExamples)
-            self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')# training new network, keeping a copy of the old one              
-            self.nnet.train(trainExamples)
-            nmcts = MCTS(self.game, self.nnet, self.args)
-            if not self.firstIter:
-                self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar') #Load the best after training to maximize efficenty
-                pmcts = MCTS(self.game, self.pnet, self.args)
-                log.info('PITTING AGAINST PREVIOUS VERSION')
-                arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=1, arena=1, instinctPlay=self.args.instinctArena)[0]),
-                            lambda x: np.argmax(nmcts.getActionProb(x, temp=1, arena=1, instinctPlay=self.args.instinctArena)[0]), self.game)
-                pwins, nwins, draws, pwins_black = arena.playGames(self.args.arenaCompare)
-                log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d ; PREV_WinOnBlack : %d' % (nwins, pwins, draws, pwins_black))
-                if pwins + nwins == 0 or float(nwins) / (pwins + nwins) < self.args.updateThreshold:
-                    log.info('REJECTING NEW MODEL')
-                    #load the current best after reject
-                    self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
-                    #self.loadTrainExamples(loadBest=True) 
-                    # Keep the example the same!!!!!!!
-                else:
-                    log.info('ACCEPTING NEW MODEL')
-                    self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
-                    self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
-
-            else: #first iteratioin, just accept it so that we have best.pth.tar
-                log.info('ACCEPTING NEW MODEL')
-                self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
-                self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
-                self.firstIter = False
+           # self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
+          
 
     def getCheckpointFile(self, iteration):
         return 'checkpoint_' + str(iteration) + '.pth.tar'
@@ -149,43 +124,8 @@ class Coach():
             Pickler(f).dump(self.trainExamplesHistory)
         f.closed
 
-    #add the way to load best example
-    def loadTrainExamples(self, loadBest=False):
-        modelFile = os.path.join(self.args.load_folder_file[0], self.args.load_folder_file[1])
-        examplesFile = modelFile + ".examples"
-        if loadBest:
-            examplesFile = "best.pth.tar.examples"
-        if not os.path.isfile(examplesFile):
-            log.warning(f'File "{examplesFile}" with trainExamples not found!')
-        else:
-            log.info("File with trainExamples found. Loading it...")
-            with open(examplesFile, "rb") as f:
-                self.trainExamplesHistory = Unpickler(f).load()
-            log.info('Loading done!')
 
-            # examples based on the model were already collected (loaded)
-            # do not skip if it loads the best
-            if not loadBest:
-                self.skipFirstSelfPlay = True
-    #load examples only
-    def loadExamples(self):
-        folder = self.args.checkpoint
-        filename = os.path.join(folder, "best.pth.tar.examples")
-        log.info("File with trainExamples found. Loading it...")
-        with open(filename, "rb") as f:
-            count = 0
-            while True:
-                try:
-                    if count == 0:
-                        self.trainExamplesHistory = Unpickler(f).load()
-                        count += 1
-                    else:
-                        self.trainExamplesHistory += Unpickler(f).load()
-                except EOFError:
-                    break 
-        while len(self.trainExamplesHistory) > self.args.numItersForTrainExamplesHistory:
-            self.trainExamplesHistory.pop(0)
-        log.info('Loading done!')
+
 
 
 
