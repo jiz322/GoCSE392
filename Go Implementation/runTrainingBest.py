@@ -23,7 +23,7 @@ args = dotdict({
     'balancedGame': True,      # if balanced, black should win over 6 scores
     'firstIter': False,        #set true if it produce first chechpoint to save, for multuprocess, the followings has to be FALSE
     'checkpoint': '../self-play/temp_level/',
-    'load_folder_file': ('../self-play/temp_level','best2000.pth.tar'),
+    'load_folder_file': ('../self-play/temp_level','1200.pth.tar'),
     'numItersForTrainExamplesHistory': 1200,
     'resignThreshold': -2,   #resign does not work for Arena
     'maxLevel': 9,
