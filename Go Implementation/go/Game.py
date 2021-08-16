@@ -13,7 +13,7 @@ from go.group import Group, GroupManager
 from go.exceptions import (
     SelfDestructException, KoException, InvalidInputException)
 '''
-class GoGame(Game):
+class Game(Game):
     square_content = {
         -1: "w",
         +0: "-",
@@ -22,7 +22,7 @@ class GoGame(Game):
 
     @staticmethod
     def getSquarePiece(piece):
-        return GoGame.square_content[piece]
+        return Game.square_content[piece]
 
     def __init__(self, args):
         self.n = args.size
@@ -247,7 +247,7 @@ class GoGame(Game):
             print(y, "|", end="")    # print the row #
             for x in range(n):
                 piece = board[y][x]    # get the piece to print
-                print(GoGame.square_content[piece], end=" ")
+                print(Game.square_content[piece], end=" ")
             print("|")
 
         print("-----------------------")

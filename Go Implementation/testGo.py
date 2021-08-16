@@ -1,6 +1,6 @@
 #test getInitBoard
-import go.GoGame as a
-g = a.GoGame(9)
+import go.Game as a
+g = a.Game(9)
 g.getInitBoard()
 from go.GoLogic import Board
 b = Board(9)
@@ -9,7 +9,7 @@ print(np.array(b.pieces))
 #same result, test pass
 
 import go.goGame as x
-a = x.GoGame()
+a = x.Game()
 a.place_black(1,1)
 a.place_white(2,1)
 a._place_stone(-1, 5, 4)

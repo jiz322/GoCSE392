@@ -5,7 +5,7 @@ from go.group import Group, GroupManager
 from go.exceptions import (
     SelfDestructException, KoException, InvalidInputException)
 
-class GoGame():
+class Game():
     '''
     Manage the high level gameplay of Go
     '''
@@ -166,7 +166,7 @@ class GameUI(object):
     def __init__(self, n):
 
         # the game object
-        self.game = GoGame(n)
+        self.game = Game(n)
 
         # store which player's turn it is
         self.turn = Stone.BLACK
@@ -270,7 +270,7 @@ class GameUI(object):
         return self._parse_move(move)
 
     #overide should not be allowed
-    #add check preexist in class GoGame function place stone.
+    #add check preexist in class Game function place stone.
     def _is_valid_input(self, move):
         '''
         Check if the given input would give a valid move, in terms of placing a stone

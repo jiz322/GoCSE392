@@ -16,7 +16,7 @@ class Arena():
             player 1,2: two functions that takes board as input, return action
             game: Game object
             display: a function that takes board as input and prints it (e.g.
-                     display in go/GoGame). Is necessary for verbose
+                     display in go/Game). Is necessary for verbose
                      mode.
 
         see go/GoPlayers.py for an example. See pit.py for pitting

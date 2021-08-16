@@ -1,6 +1,6 @@
 import Arena
 from MCTS import MCTS
-from go.GoGame import GoGame
+from go.Game import Game
 from go.GoPlayers import *
 from go.pytorch.NNet import NNetWrapper as NNet
 
@@ -26,7 +26,7 @@ args = dotdict({
 human_vs_cpu = True
 
 
-g = GoGame(args)
+g = Game(args)
 
 # all players
 rp = RandomPlayer(g).play
@@ -45,7 +45,7 @@ n1p = lambda x: np.argmax(mcts1.getActionProb(x, temp=0,instinctPlay=args.instin
 player2 = hp
 
 
-arena = Arena.Arena(player2, n1p, g, display=GoGame.display)
+arena = Arena.Arena(player2, n1p, g, display=Game.display)
 y, x, z, xb = arena.playGames(2, verbose=True)
 print("Bots win: ", x)
 print("Human win: ", y)

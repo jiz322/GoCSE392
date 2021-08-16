@@ -28,7 +28,7 @@ from tictactoe_3d.TicTacToeGame import TicTacToeGame as TicTacToe3DGame
 from tictactoe_3d.TicTacToePlayers import *
 from tictactoe_3d.keras.NNet import NNetWrapper as TicTacToe3DKerasNNet
 
-from go.GoGame import GoGame
+from go.Game import Game
 from go.GoPlayers import *
 from go.pytorch.NNet import NNetWrapper as GoPytorchNNet
 from go.tensorflow.NNet import NNetWrapper as GoTensorflowNNet
@@ -60,13 +60,13 @@ class TestAllGames(unittest.TestCase):
         print(arena.playGames(2, verbose=False))
 
     def test_go_pytorch(self):
-        self.execute_game_test(GoGame(6), GoPytorchNNet)
+        self.execute_game_test(Game(6), GoPytorchNNet)
 
     def test_go_tensorflow(self):
-        self.execute_game_test(GoGame(6), GoTensorflowNNet)
+        self.execute_game_test(Game(6), GoTensorflowNNet)
 
     def test_go_keras(self):
-        self.execute_game_test(GoGame(6), GoKerasNNet)
+        self.execute_game_test(Game(6), GoKerasNNet)
 
     def test_tictactoe_keras(self):
         self.execute_game_test(TicTacToeGame(), TicTacToeKerasNNet)

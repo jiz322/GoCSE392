@@ -1,6 +1,6 @@
 import Arena
 from MCTS import MCTS
-from go.GoGame import GoGame
+from go.Game import Game
 from go.GoPlayers import *
 from go.pytorch.NNet import NNetWrapper as NNet
 import numpy as np
@@ -29,7 +29,7 @@ args = dotdict({
 })
 
 
-g = GoGame(args)
+g = Game(args)
 
 rp = RandomPlayer(g).play
 hp = HumanGoPlayer(g).play
