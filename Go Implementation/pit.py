@@ -1,7 +1,7 @@
 import Arena
 from MCTS import MCTS
 from go.Game import Game
-from go.OthelloPlayers import *
+from go.GoPlayers import *
 from go.pytorch.NNet import NNetWrapper as NNet
 
 
@@ -45,8 +45,8 @@ g = Game(args)
 
 # all players
 rp = RandomPlayer(g).play
-#gp = GreedyOthelloPlayer(g).play
-hp = HumanOthelloPlayer(g).play
+#gp = GreedyGoPlayer(g).play
+hp = HumanGoPlayer(g).play
 
 
 

@@ -14,7 +14,7 @@ from MCTS import MCTS
 log = logging.getLogger(__name__)
 
 
-class Coach():
+class Coach_update4tar():
     """
     This class executes the self-play + learning. It uses the functions defined
     in Game and NeuralNet. args are specified in main.py.
@@ -55,27 +55,24 @@ class Coach():
             trainExamples = []
             for e in self.trainExamplesHistory:
                 trainExamples.extend(e)
-            self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='150games.tar') 
+            self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='250games.tar') 
 #            self.n2net.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar') 
-            self.n3net.load_checkpoint(folder=self.args.checkpoint, filename='200games.tar') 
+            self.n3net.load_checkpoint(folder=self.args.checkpoint, filename='250games.tar') 
 
-            #shuffle(trainExamples)              
-            #self.nnet.train(trainExamples)
-           # shuffle(trainExamples)              
-          #  self.n2net.train(trainExamples)
-           # shuffle(trainExamples)              
-           # self.n3net.train(trainExamples)
-           # self.n3net.save_checkpoint(folder=self.args.checkpoint, filename='temp3.pth.tar')
+            shuffle(trainExamples)              
+            self.nnet.train(trainExamples)
+            shuffle(trainExamples)              
+            self.n3net.train(trainExamples)
             self.n4net.load_checkpoint(folder=self.args.checkpoint, filename='250games.tar') #Load n3 result, see if it perform better
-           # shuffle(trainExamples)              
-            #self.n4net.train(trainExamples)
+            shuffle(trainExamples)              
+            self.n4net.train(trainExamples)
 
             nmcts = MCTS(self.game, self.nnet, self.args)
         #    n2mcts = MCTS(self.game, self.n2net, self.args)
             n3mcts = MCTS(self.game, self.n3net, self.args)
             n4mcts = MCTS(self.game, self.n4net, self.args)
 
-            self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='100games.tar') #Load the best after training to maximize efficenty
+            self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar') #Load the best after training to maximize efficenty
             pmcts = MCTS(self.game, self.pnet, self.args)
             log.info('Arena Start! A tournament between PREVIOUS VERSION and 4 new ones!')
 
@@ -90,7 +87,7 @@ class Coach():
             nnList = [self.pnet, self.nnet, self.n3net, self.n4net]
             result = self.tournament(playerList)
             winner = nnList[result.index(max(result))]
-            winner.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
+            winner.save_checkpoint(folder=self.args.checkpoint, filename='250games.tar')
             log.info('UPDATING BEST')
             log.info('ARENA RESULT: ', result)
             winner.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
@@ -140,4 +137,3 @@ class Coach():
                         tournamentResult[b] += (bWin - aWin + self.args.arenaCompare)/2
                         repeat.append((playList.index(a)+1)*(playList.index(b)+1))
         return list(tournamentResult.values())
-
