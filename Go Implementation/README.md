@@ -12,7 +12,7 @@
 
 ### Train a 9*9 Game model (in process)
 
-To start training a model for Go, we run three python script concurentlly:
+To start training a model for Go, run three python script concurentlly:
 
 To generate game examples. (can run multiple times of this script in a concurent manner)
 ```bash
@@ -23,7 +23,7 @@ To generate network weight using examples.
 ```bash
 python runTraining4tars.py
 ```
-For training 9*9 model, run this line 4 times and do not forget to modify the name of network's tar file each time in Coach.
+For training 9*9 model, run this line 4 times and do not forget to modify the name of network's tar file each time in the Coach.
 
 When 4 network weight is ready, update the best network weight with the best of these 4.
 ```bash
@@ -36,11 +36,11 @@ python pit.py
 All models are in temp folder
 
 ### The temp folder
-We trained a PyTorch model for 6x6 Go (~80 iterations, 100 episodes per iteration and 25 MCTS simulations per turn). This took about 3 days on an NVIDIA Tesla K80. The pretrained model (PyTorch) can be found in ```pretrained_models/go/pytorch/```. You can play a game against it using ```pit.py```. Below is the performance of the model against a random and a greedy baseline with the number of iterations.
+We trained severfor 6x6 Go (~80 iterations, 100 episodes per iteration and 25 MCTS simulations per turn). This took about 3 days on an NVIDIA Tesla K80. The pretrained model (PyTorch) can be found in ```pretrained_models/go/pytorch/```. You can play a game against it using ```pit.py```. Below is the performance of the model against a random and a greedy baseline with the number of iterations.
 
 
 
 ### Contributors and Credits
-* [Jiageng Zheng](https://github.com/jiz322) 
+* [Jiageng Zheng](https://github.com/jiz322) Contribute Go implementation, Parallel optimazation, MCLT optimazation, Arena optimazation, and the training for 5*5 and 9*9 Go models.
 * [Ted Huang](https://github.com/teddy57320) Credits for original Go [logic files](https://github.com/teddy57320/go).
 
