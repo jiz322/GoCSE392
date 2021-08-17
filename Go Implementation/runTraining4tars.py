@@ -21,9 +21,9 @@ args = dotdict({
     'cpuct': 1.1,
     'instinctArena': False,     #if set true reset Arena's MTCL tree each time
     'balancedGame': True,      # if balanced, black should win over 6 scores
-    'firstIter': False,        #set true if it produce first chechpoint to save, for multuprocess, the followings has to be FALSE
-    'checkpoint': '../self-play/temp_level/',
-    'load_folder_file': ('../self-play/temp_level','best2000.pth.tar'),
+    'firstIter': True,        #set true if it produce first chechpoint to save, for multuprocess, the followings has to be FALSE
+    'checkpoint': './temp/',
+    'load_folder_file': ('./temp/','9*9aug16th.tar'),
     'numItersForTrainExamplesHistory': 1200,
     'resignThreshold': -2,   #resign does not work for Arena
     'maxLevel': 9,
