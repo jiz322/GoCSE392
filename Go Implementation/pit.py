@@ -21,7 +21,7 @@ args = dotdict({
     'instinctArena': False,      # if set true reset Arena's MTCL tree each time
     'balancedGame': True,      # if balanced, black should win over 6 scores
     'resignThreshold': -0.9, # No Use. Resign Only in self-play Training
-    'maxLevel': 14,
+    'maxLevel': 7,
     'levelBased': True,
     'maxLeaves': 4,
 })
@@ -52,13 +52,13 @@ hp = HumanGoPlayer(g).play
 
 # nnet players
 n1 = NNet(g)
-n1.load_checkpoint('../self-play/temp_level/','250games.tar')
+n1.load_checkpoint('./temp/','9*9aug16th.tar')
 mcts1 = MCTS(g, n1, args)
 n1p = lambda x: np.argmax(mcts1.getActionProb(x, arena=1, temp=0, ew=-1,instinctPlay=args.instinctArena, levelBased=args.levelBased)[0])
 
 # nnet players
 n2 = NNet(g)
-n2.load_checkpoint('../self-play/temp_level/','best.pth.tar')
+n2.load_checkpoint('./temp/','9*9aug16th.tar')
 mcts2 = MCTS(g, n2, args2)
 n2p = lambda x: np.argmax(mcts2.getActionProb(x, arena=1, temp=0,instinctPlay=args.instinctArena, levelBased=args.levelBased)[0])
 
