@@ -43,6 +43,6 @@ We trained severfor 6x6 Go (~80 iterations, 100 episodes per iteration and 25 MC
 
 
 ### Contributors and Credits
-* [Jiageng Zheng](https://github.com/jiz322) Contribute Go implementation, Parallel optimazation, MCLT optimazation, Arena optimazation, and the training for 5*5 and 9*9 Go models.
+* [Jiageng Zheng](https://github.com/jiz322) Contribute Go implementation, Parallel optimazation, MCLT optimazation, Arena optimazation, various modifications(more details coming soon), and the training for 5*5 and 9*9 Go models.
 * [Ted Huang](https://github.com/teddy57320) Credits for original Go [logic files](https://github.com/teddy57320/go).
 
